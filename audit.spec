@@ -6,13 +6,15 @@ Summary: User-space tools for Linux 2.6 kernel auditing
 Version: 1.5.3
 Release: %mkrel 1
 License: GPL
-Group: System/base
+Group: System/Base
 Source0: http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
 URL: http://people.redhat.com/sgrubb/audit/index.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(id -u -n)
 # need proper kernel headers
 #BuildRequires: glibc-devel >= XXX
 %py_requires -d
+Requires(preun): rpm-helper
+Requires(post): rpm-helper
 
 %description
 The audit package contains the user space utilities for storing and
@@ -30,7 +32,7 @@ This package contains the main libraries for %{name}.
 Summary: Development files for %{name}
 Group: Development/C
 Requires: %{libname} = %{version}
-Provides: %mklibname %{name} -d = %{version}-%{release}
+Provides: libaudit-devel = %{version}-%{release}
 
 %description -n %{libname}-devel
 This package contains development files for %{name}.
