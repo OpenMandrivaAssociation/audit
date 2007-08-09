@@ -1,5 +1,6 @@
 %define major 0
 %define libname %mklibname audit %{major}
+%define devellibname %mklibname -d %name %major
 
 Name: audit
 Summary: User-space tools for Linux 2.6 kernel auditing
@@ -28,18 +29,18 @@ Group: System/Libraries
 %description -n %{libname}
 This package contains the main libraries for %{name}.
 
-%package -n %{libname}-devel
+%package -n %devellibname
 Summary: Development files for %{name}
 Group: Development/C
 Requires: %{libname} = %{version}
 Provides: libaudit-devel = %{version}-%{release}
 
-%description -n %{libname}-devel
+%description -n %devellibname
 This package contains development files for %{name}.
 
 %package -n %{libname}-static-devel
 Summary: Static libraries for %{name}
-Requires: %{libname}-devel = %{version}
+Requires: %devellibname = %{version}
 Group: Development/C
 
 %description -n %{libname}-static-devel
@@ -101,7 +102,7 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/audit/audit.rules
 /%{_lib}/lib*.so.*
 
-%files -n %{libname}-devel
+%files -n %devellibname
 %defattr(-,root,root)
 %doc ChangeLog
 /%{_lib}/lib*.so
