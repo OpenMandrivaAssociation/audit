@@ -13,6 +13,7 @@ URL: http://people.redhat.com/sgrubb/audit/index.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(id -u -n)
 # need proper kernel headers
 BuildRequires: glibc-devel >= 2.6
+BuildRequires: gettext-devel intltool libtool swig python-devel
 %py_requires -d
 Requires(preun): rpm-helper
 Requires(post): rpm-helper
