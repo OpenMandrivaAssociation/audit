@@ -4,7 +4,7 @@
 
 Name: audit
 Summary: User-space tools for Linux 2.6 kernel auditing
-Version: 1.5.4
+Version: 1.5.6
 Release: %mkrel 1
 License: GPL
 Group: System/Base
@@ -58,7 +58,7 @@ This package contains python bindings for %{name}.
 %setup -q
 
 %build
-autoreconf -fv --install
+aclocal && autoconf && autoheader && automake
 %configure --sbindir=/sbin --libdir=/%{_lib} --with-apparmor
 %make
 
