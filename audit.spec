@@ -69,12 +69,12 @@ This package contains python bindings for %{name}.
 aclocal && autoconf && autoheader && automake
 %configure --sbindir=/sbin --libdir=/%{_lib} --with-apparmor
 %make
-%find_lang system-config-audit
 
 %install
 rm -rf %{buildroot}
 mkdir -p -m 0700 %{buildroot}%{_var}/log/audit
 %{makeinstall_std}
+%find_lang system-config-audit
 
 # uneeded files
 rm -f %{buildroot}%py_platsitedir/*.{a,la}
