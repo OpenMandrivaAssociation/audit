@@ -30,6 +30,13 @@ Group: System/Libraries
 %description -n %{libname}
 This package contains the main libraries for %{name}.
 
+%package -n lib%{name}-common
+Summary: Common files for %{name}
+Group: System/Base
+
+%description -n lib%{name}-common
+This package contains common files for %{name}.
+
 %package -n %devellibname
 Summary: Development files for %{name}
 Group: Development/C
@@ -62,6 +69,7 @@ This package contains python bindings for %{name}.
 aclocal && autoconf && autoheader && automake
 %configure --sbindir=/sbin --libdir=/%{_lib} --with-apparmor
 %make
+%find_lang system-config-audit
 
 %install
 rm -rf %{buildroot}
@@ -90,10 +98,17 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/sysconfig/auditd
 %config(noreplace) %{_sysconfdir}/audit/auditd.conf
 /sbin/*
+%_bindir/system-config-audit
+%_libdir/system-config-audit-server
 %{_initrddir}/auditd
 %{_mandir}/man5/auditd.conf.5*
 %{_mandir}/man8/*
 %attr(0700,root,root) %{_var}/log/audit
+%_datadir/applications/system-config-audit.desktop
+
+%files -n lib%{name}-common -f system-config-audit.lang
+%defattr(-,root,root)
+%_datadir/system-config-audit/
 
 %files -n %{libname}
 %defattr(-,root,root)
