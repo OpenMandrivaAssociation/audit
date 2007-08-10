@@ -133,3 +133,4 @@ rm -rf %{buildroot}
 %files -n python-audit
 %defattr(-,root,root)
 %py_platsitedir/*
+%py_purelibdir/*
