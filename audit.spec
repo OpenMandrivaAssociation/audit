@@ -17,6 +17,7 @@ BuildRequires: gettext-devel intltool libtool swig python-devel
 %py_requires -d
 Requires(preun): rpm-helper
 Requires(post): rpm-helper
+Requires: python-audit
 
 %description
 The audit package contains the user space utilities for storing and
