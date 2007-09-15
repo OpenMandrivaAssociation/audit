@@ -5,7 +5,7 @@
 Name: audit
 Summary: User-space tools for Linux 2.6 kernel auditing
 Version: 1.5.6
-Release: %mkrel 3
+Release: %mkrel 4
 License: GPL
 Group: System/Base
 Source0: http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
@@ -18,6 +18,8 @@ BuildRequires: gettext-devel intltool libtool swig python-devel
 Requires(preun): rpm-helper
 Requires(post): rpm-helper
 Requires: python-audit
+Obsoletes: lib%{name}-common
+Conflicts: lib%{name}-common
 
 %description
 The audit package contains the user space utilities for storing and
@@ -30,13 +32,6 @@ Group: System/Libraries
 
 %description -n %{libname}
 This package contains the main libraries for %{name}.
-
-%package -n lib%{name}-common
-Summary: Common files for %{name}
-Group: System/Base
-
-%description -n lib%{name}-common
-This package contains common files for %{name}.
 
 %package -n %devellibname
 Summary: Development files for %{name}
@@ -93,13 +88,14 @@ rm -rf %{buildroot}
 %preun
 %_preun_service auditd
 
-%files
+%files -f system-config-audit.lang
 %defattr(-,root,root)
 %doc README COPYING
 %config(noreplace) %{_sysconfdir}/sysconfig/auditd
 %config(noreplace) %{_sysconfdir}/audit/auditd.conf
 /sbin/*
 %_bindir/system-config-audit
+%_datadir/system-config-audit/
 %_libdir/system-config-audit-server
 %{_initrddir}/auditd
 %{_mandir}/man5/auditd.conf.5*
@@ -107,9 +103,6 @@ rm -rf %{buildroot}
 %attr(0700,root,root) %{_var}/log/audit
 %_datadir/applications/system-config-audit.desktop
 
-%files -n lib%{name}-common -f system-config-audit.lang
-%defattr(-,root,root)
-%_datadir/system-config-audit/
 
 %files -n %{libname}
 %defattr(-,root,root)
