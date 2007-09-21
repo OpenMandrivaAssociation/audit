@@ -9,6 +9,7 @@ Release: %mkrel 2
 License: GPL
 Group: System/Base
 Source0: http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
+Patch: audit-1.6.1-desktopfile.patch
 URL: http://people.redhat.com/sgrubb/audit/index.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(id -u -n)
 # need proper kernel headers
@@ -76,6 +77,7 @@ This package contains python bindings for %{name}.
 
 %prep
 %setup -q
+%patch -p1
 
 %build
 ./autogen.sh
@@ -112,7 +114,7 @@ rm -rf %{buildroot}
 %preun
 %_preun_service auditd
 
-%files -f system-config-audit.lang
+%files
 %defattr(-,root,root)
 %doc README COPYING
 %config(noreplace) %{_sysconfdir}/sysconfig/auditd
