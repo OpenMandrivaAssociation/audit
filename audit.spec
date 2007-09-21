@@ -5,7 +5,7 @@
 Name: audit
 Summary: User-space tools for Linux 2.6 kernel auditing
 Version: 1.6.1
-Release: %mkrel 1
+Release: %mkrel 2
 License: GPL
 Group: System/Base
 Source0: http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
@@ -48,6 +48,8 @@ Summary: Development files for %{name}
 Group: Development/C
 Requires: %{libname}%{major} = %{version}
 Provides: libaudit-devel = %{version}-%{release}
+Provides: audit-devel = %{version}-%{release}
+Provides: audit-libs-devel = %{version}-%{release}
 Obsoletes: %{libname}0-devel
 
 %description -n %devellibname
@@ -57,6 +59,8 @@ This package contains development files for %{name}.
 Summary: Static libraries for %{name}
 Requires: %devellibname = %{version}
 Group: Development/C
+Provides: audit-static-devel = %{version}-%{release}
+Provides: audit-libs-static-devel = %{version}-%{release}
 Obsoletes: %{libname}0-static-devel
 
 %description -n %{libname}-static-devel
@@ -75,15 +79,15 @@ This package contains python bindings for %{name}.
 
 %build
 ./autogen.sh
-%configure --sbindir=/sbin --libdir=/%{_lib} --with-apparmor --libexecdir=%{_sbindir}
-%make
+%{configure2_5x} --sbindir=/sbin --libdir=/%{_lib} --with-apparmor --libexecdir=%{_sbindir}
+%{make}
 
 %install
 rm -rf %{buildroot}
 mkdir -p -m 0700 %{buildroot}%{_var}/log/audit
 %{makeinstall_std}
 pushd system-config-audit
-make DESTDIR=%{buildroot} install-fedora
+%{makeinstall_std} install-fedora
 popd
 %find_lang system-config-audit
 
@@ -161,4 +165,3 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 %py_platsitedir/*
 %py_purelibdir/*
-
