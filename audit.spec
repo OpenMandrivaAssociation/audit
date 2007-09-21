@@ -5,7 +5,7 @@
 Name: audit
 Summary: User-space tools for Linux 2.6 kernel auditing
 Version: 1.6.1
-Release: %mkrel 2
+Release: %mkrel 3
 License: GPL
 Group: System/Base
 Source0: http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
