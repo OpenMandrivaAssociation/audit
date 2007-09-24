@@ -5,11 +5,12 @@
 Name: audit
 Summary: User-space tools for Linux 2.6 kernel auditing
 Version: 1.6.1
-Release: %mkrel 3
+Release: %mkrel 4
 License: GPL
 Group: System/Base
 Source0: http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
 Patch: audit-1.6.1-desktopfile.patch
+Patch1: audit-1.6.1-sendmail.patch
 URL: http://people.redhat.com/sgrubb/audit/index.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(id -u -n)
 # need proper kernel headers
@@ -77,7 +78,8 @@ This package contains python bindings for %{name}.
 
 %prep
 %setup -q
-%patch -p1
+%patch -p1 -b .misc
+%patch1 -p1
 
 %build
 ./autogen.sh
