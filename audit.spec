@@ -5,12 +5,14 @@
 Name: audit
 Summary: User-space tools for Linux 2.6 kernel auditing
 Version: 1.6.1
-Release: %mkrel 4
+Release: %mkrel 5
 License: GPL
 Group: System/Base
 Source0: http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
 Patch: audit-1.6.1-desktopfile.patch
 Patch1: audit-1.6.1-sendmail.patch
+# http://qa.mandriva.com/show_bug.cgi?id=33891
+Patch2: audit-1.6.1-offt.patch
 URL: http://people.redhat.com/sgrubb/audit/index.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(id -u -n)
 # need proper kernel headers
@@ -41,6 +43,9 @@ Obsoletes: %{libname}-common < 1.6.1
 # moved some files from there to here
 Conflicts: %{name} < 1.6.1
 Requires: python-audit
+Requires: pygtk2.0-libglade
+Requires: audit
+Requires: usermode-consoleonly >= 1.92-4mdv2008.0
 
 %description -n system-config-audit
 This package contains a GUI for configuring the Audit system.
@@ -80,6 +85,7 @@ This package contains python bindings for %{name}.
 %setup -q
 %patch -p1 -b .misc
 %patch1 -p1
+%patch2 -p1
 
 %build
 ./autogen.sh
