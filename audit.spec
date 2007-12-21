@@ -14,6 +14,7 @@ Patch1: audit-1.6.1-sendmail.patch
 # http://qa.mandriva.com/show_bug.cgi?id=33891
 Patch2: audit-1.6.1-offt.patch
 URL: http://people.redhat.com/sgrubb/audit/index.html
+BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(id -u -n)
 # need proper kernel headers
 BuildRequires: glibc-devel >= 2.6
 BuildRequires: gettext-devel intltool libtool swig python-devel
