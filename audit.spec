@@ -5,13 +5,15 @@
 Name: audit
 Summary: User-space tools for Linux 2.6 kernel auditing
 Version: 1.6.4
-Release: %mkrel 1
+Release: %mkrel 2
 License: GPL
 Group: System/Base
 Source0: http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
 Patch: audit-1.6.1-desktopfile.patch
 Patch1: audit-1.6.1-sendmail.patch
 Patch2: audit-am_cflags.diff
+# https://www.redhat.com/archives/linux-audit/2007-December/msg00100.html
+Patch3: audit-1.6.4-logperms.patch
 URL: http://people.redhat.com/sgrubb/audit/index.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(id -u -n)
 # need proper kernel headers
@@ -100,6 +102,7 @@ behavior.
 %patch0 -p1 -b .misc
 %patch1 -p1
 %patch2 -p0
+%patch3 -p1 -b .logperms
 
 find -type d -name ".libs" | xargs rm -rf
 
