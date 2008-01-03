@@ -4,20 +4,20 @@
 
 Name: audit
 Summary: User-space tools for Linux 2.6 kernel auditing
-Version: 1.6.1
-Release: %mkrel 5
+Version: 1.6.4
+Release: %mkrel 1
 License: GPL
 Group: System/Base
 Source0: http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
 Patch: audit-1.6.1-desktopfile.patch
 Patch1: audit-1.6.1-sendmail.patch
-# http://qa.mandriva.com/show_bug.cgi?id=33891
-Patch2: audit-1.6.1-offt.patch
+Patch2: audit-am_cflags.diff
 URL: http://people.redhat.com/sgrubb/audit/index.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(id -u -n)
 # need proper kernel headers
 BuildRequires: glibc-devel >= 2.6
 BuildRequires: gettext-devel intltool libtool swig python-devel
+BuildRequires: openldap-devel
 %py_requires -d
 Requires(preun): rpm-helper
 Requires(post): rpm-helper
@@ -81,24 +81,51 @@ Group: Development/Python
 %description -n python-audit
 This package contains python bindings for %{name}.
 
+%package -n audispd-plugins
+Summary: Plugins for the audit event dispatcher
+Group: System/Base
+Requires: %{name} = %{version}
+Requires: %{libname}%{major} = %{version}
+Requires: openldap
+
+%description -n audispd-plugins
+The audispd-plugins package provides plugins for the real-time
+interface to the audit system, audispd. These plugins can do things
+like relay events to remote machines or analyze events for suspicious
+behavior.
+
 %prep
+
 %setup -q
-%patch -p1 -b .misc
+%patch0 -p1 -b .misc
 %patch1 -p1
-%patch2 -p1
+%patch2 -p0
+
+find -type d -name ".libs" | xargs rm -rf
 
 %build
 ./autogen.sh
-%{configure2_5x} --sbindir=/sbin --libdir=/%{_lib} --with-apparmor --libexecdir=%{_sbindir}
-%{make}
+
+%configure2_5x \
+    --sbindir=/sbin \
+    --libdir=/%{_lib} \
+    --with-apparmor \
+    --libexecdir=%{_sbindir}
+
+%make
 
 %install
 rm -rf %{buildroot}
-mkdir -p -m 0700 %{buildroot}%{_var}/log/audit
-%{makeinstall_std}
+
+install -d %{buildroot}%{_var}/log/audit
+install -d %{buildroot}%{_libdir}/audit
+
+%makeinstall_std
+
 pushd system-config-audit
-%{makeinstall_std} install-fedora
+    %makeinstall_std install-fedora
 popd
+
 %find_lang system-config-audit
 
 # uneeded files
@@ -125,19 +152,31 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root)
 %doc README COPYING
-%config(noreplace) %{_sysconfdir}/sysconfig/auditd
-%config(noreplace) %{_sysconfdir}/audit/auditd.conf
-%dir %{_sysconfdir}/audisp
-%dir %{_sysconfdir}/audisp/plugins.d
-%config(noreplace) %{_sysconfdir}/audisp/audispd.conf
-%config(noreplace) %{_sysconfdir}/audisp/plugins.d/af_unix.conf
-%config(noreplace) %{_sysconfdir}/audisp/plugins.d/syslog.conf
-/sbin/*
 %{_initrddir}/auditd
-%{_mandir}/man5/auditd.conf.5*
-%{_mandir}/man5/audispd.conf.5*
-%{_mandir}/man8/*
-%attr(0700,root,root) %{_var}/log/audit
+%attr(0750,root,root) %dir %{_sysconfdir}/audit
+%attr(0750,root,root) %dir %{_sysconfdir}/audisp
+%attr(0750,root,root) %dir %{_sysconfdir}/audisp/plugins.d
+%attr(0750,root,root) %dir %{_libdir}/audit
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/auditd.conf
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/audit.rules
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/sysconfig/auditd
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audispd.conf
+%attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/af_unix.conf
+%attr(0750,root,root) /sbin/auditctl
+%attr(0750,root,root) /sbin/auditd
+%attr(0755,root,root) /sbin/ausearch
+%attr(0755,root,root) /sbin/aureport
+%attr(0750,root,root) /sbin/autrace
+%attr(0750,root,root) /sbin/audispd
+%attr(0644,root,root) %{_mandir}/man8/audispd.8*
+%attr(0644,root,root) %{_mandir}/man8/auditctl.8*
+%attr(0644,root,root) %{_mandir}/man8/auditd.8*
+%attr(0644,root,root) %{_mandir}/man8/aureport.8*
+%attr(0644,root,root) %{_mandir}/man8/ausearch.8*
+%attr(0644,root,root) %{_mandir}/man8/autrace.8*
+%attr(0644,root,root) %{_mandir}/man5/auditd.conf.5*
+%attr(0644,root,root) %{_mandir}/man5/audispd.conf.5*
+%attr(0700,root,root) %dir %{_var}/log/audit
 
 %files -n system-config-audit -f system-config-audit.lang
 %defattr(-,root,root)
@@ -145,18 +184,15 @@ rm -rf %{buildroot}
 %doc system-config-audit/COPYING system-config-audit/AUTHORS
 %config(noreplace) %{_sysconfdir}/pam.d/system-config-audit-server
 %config(noreplace) %{_sysconfdir}/security/console.apps/system-config-audit-server
-%_datadir/applications/system-config-audit.desktop
-%_datadir/system-config-audit/
-%_bindir/system-config-audit
-%_sbindir/system-config-audit-server-real
-%_sbindir/system-config-audit-server
+%{_datadir}/applications/system-config-audit.desktop
+%{_datadir}/system-config-audit/
+%{_bindir}/system-config-audit
+%{_sbindir}/system-config-audit-server-real
+%{_sbindir}/system-config-audit-server
 
 %files -n %{libname}%{major}
 %defattr(-,root,root)
-%config(noreplace) %{_sysconfdir}/libaudit.conf
-%dir %{_sysconfdir}/audit
-# XXX - here or in the bin package?
-%config(noreplace) %{_sysconfdir}/audit/audit.rules
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/libaudit.conf
 /%{_lib}/lib*.so.*
 
 %files -n %devellibname
@@ -173,5 +209,18 @@ rm -rf %{buildroot}
 
 %files -n python-audit
 %defattr(-,root,root)
-%py_platsitedir/*
-%py_purelibdir/*
+%{py_platsitedir}/*.so
+%{py_platsitedir}/auparse*.egg-info
+%{py_purelibdir}/site-packages/audit.p*
+
+%files -n audispd-plugins
+%defattr(-,root,root,-)
+%attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/syslog.conf
+%attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/au-ids.conf
+%attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/remote.conf
+%attr(0750,root,root) /sbin/audisp-ids
+%attr(0644,root,root) %{_mandir}/man8/audispd-zos-remote.8*
+%attr(0644,root,root) %{_mandir}/man5/zos-remote.conf.5*
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/audispd-zos-remote.conf
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/zos-remote.conf
+%attr(0750,root,root) /sbin/audispd-zos-remote
