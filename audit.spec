@@ -4,16 +4,14 @@
 
 Name: audit
 Summary: User-space tools for Linux 2.6 kernel auditing
-Version: 1.6.4
-Release: %mkrel 2
+Version: 1.6.5
+Release: %mkrel 1
 License: GPL
 Group: System/Base
 Source0: http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
 Patch: audit-1.6.1-desktopfile.patch
 Patch1: audit-1.6.1-sendmail.patch
 Patch2: audit-am_cflags.diff
-# https://www.redhat.com/archives/linux-audit/2007-December/msg00100.html
-Patch3: audit-1.6.4-logperms.patch
 URL: http://people.redhat.com/sgrubb/audit/index.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(id -u -n)
 # need proper kernel headers
@@ -102,7 +100,6 @@ behavior.
 %patch0 -p1 -b .misc
 %patch1 -p1
 %patch2 -p0
-%patch3 -p1 -b .logperms
 
 find -type d -name ".libs" | xargs rm -rf
 
@@ -171,15 +168,18 @@ rm -rf %{buildroot}
 %attr(0755,root,root) /sbin/aureport
 %attr(0750,root,root) /sbin/autrace
 %attr(0750,root,root) /sbin/audispd
+%attr(0750,root,root) /sbin/aulastlog
 %attr(0644,root,root) %{_mandir}/man8/audispd.8*
 %attr(0644,root,root) %{_mandir}/man8/auditctl.8*
 %attr(0644,root,root) %{_mandir}/man8/auditd.8*
 %attr(0644,root,root) %{_mandir}/man8/aureport.8*
 %attr(0644,root,root) %{_mandir}/man8/ausearch.8*
 %attr(0644,root,root) %{_mandir}/man8/autrace.8*
+%attr(0644,root,root) %{_mandir}/man8/aulastlog.8*
 %attr(0644,root,root) %{_mandir}/man5/auditd.conf.5*
 %attr(0644,root,root) %{_mandir}/man5/audispd.conf.5*
 %attr(0700,root,root) %dir %{_var}/log/audit
+
 
 %files -n system-config-audit -f system-config-audit.lang
 %defattr(-,root,root)
@@ -219,9 +219,6 @@ rm -rf %{buildroot}
 %files -n audispd-plugins
 %defattr(-,root,root,-)
 %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/syslog.conf
-%attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/au-ids.conf
-%attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/remote.conf
-%attr(0750,root,root) /sbin/audisp-ids
 %attr(0644,root,root) %{_mandir}/man8/audispd-zos-remote.8*
 %attr(0644,root,root) %{_mandir}/man5/zos-remote.conf.5*
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/audispd-zos-remote.conf
