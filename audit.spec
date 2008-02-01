@@ -4,14 +4,13 @@
 
 Name: audit
 Summary: User-space tools for Linux 2.6 kernel auditing
-Version: 1.6.5
-Release: %mkrel 2
+Version: 1.6.7
+Release: %mkrel 1
 License: GPL
 Group: System/Base
 Source0: http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
 Patch: audit-1.6.1-desktopfile.patch
 Patch1: audit-1.6.1-sendmail.patch
-Patch2: audit-am_cflags.diff
 URL: http://people.redhat.com/sgrubb/audit/index.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(id -u -n)
 # need proper kernel headers
@@ -23,6 +22,7 @@ Requires(preun): rpm-helper
 Requires(post): rpm-helper
 # has the mandriva-simple-auth pam config file we link to
 Requires: usermode-consoleonly >= 1.92-4mdv2008.0
+BuildRequires: prelude-devel >= 0.9.16
 
 %description
 The audit package contains the user space utilities for storing and
@@ -99,7 +99,6 @@ behavior.
 %setup -q
 %patch0 -p1 -b .misc
 %patch1 -p1
-%patch2 -p0
 
 find -type d -name ".libs" | xargs rm -rf
 
@@ -110,6 +109,7 @@ find -type d -name ".libs" | xargs rm -rf
     --sbindir=/sbin \
     --libdir=/%{_lib} \
     --with-apparmor \
+    --with-prelude \
     --libexecdir=%{_sbindir}
 
 %make
@@ -161,7 +161,7 @@ rm -rf %{buildroot}
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/audit.rules
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/sysconfig/auditd
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audispd.conf
-%attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/af_unix.conf
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/af_unix.conf
 %attr(0750,root,root) /sbin/auditctl
 %attr(0750,root,root) /sbin/auditd
 %attr(0755,root,root) /sbin/ausearch
@@ -220,7 +220,10 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/syslog.conf
 %attr(0644,root,root) %{_mandir}/man8/audispd-zos-remote.8*
+%attr(0644,root,root) %{_mandir}/man8/audisp-prelude.8*
 %attr(0644,root,root) %{_mandir}/man5/zos-remote.conf.5*
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/audispd-zos-remote.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/zos-remote.conf
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/au-prelude.conf
 %attr(0750,root,root) /sbin/audispd-zos-remote
+%attr(0750,root,root) /sbin/audisp-prelude
