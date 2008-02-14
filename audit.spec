@@ -4,7 +4,7 @@
 
 Name: audit
 Summary: User-space tools for Linux 2.6 kernel auditing
-Version: 1.6.7
+Version: 1.6.8
 Release: %mkrel 1
 License: GPL
 Group: System/Base
