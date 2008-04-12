@@ -11,6 +11,7 @@ Group: System/Base
 Source0: http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
 Patch: audit-1.6.1-desktopfile.patch
 Patch1: audit-1.6.1-sendmail.patch
+Patch2: audit-1.7.1-fdr-log-cmd-overflow.patch
 URL: http://people.redhat.com/sgrubb/audit/index.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(id -u -n)
 # need proper kernel headers
@@ -99,6 +100,7 @@ behavior.
 %setup -q
 %patch0 -p1 -b .misc
 %patch1 -p1
+%patch2 -p1 -b .cve-2008-1628
 
 find -type d -name ".libs" | xargs rm -rf
 
