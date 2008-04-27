@@ -2,94 +2,96 @@
 %define libname %mklibname audit
 %define devellibname %mklibname -d %name
 
-Name: audit
-Summary: User-space tools for Linux 2.6 kernel auditing
-Version: 1.6.8
-Release: %mkrel 1
-License: GPL
-Group: System/Base
-Source0: http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
-Patch: audit-1.6.1-desktopfile.patch
-Patch1: audit-1.6.1-sendmail.patch
-Patch2: audit-1.7.1-fdr-log-cmd-overflow.patch
-URL: http://people.redhat.com/sgrubb/audit/index.html
-BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(id -u -n)
+Summary:	User-space tools for Linux 2.6 kernel auditing
+Name:		audit
+Version:	1.7.2
+Release:	%mkrel 1
+License:	LGPLv2+
+Group:		System/Base
+URL:		http://people.redhat.com/sgrubb/audit/
+Source0:	http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
+Patch0:		audit-1.6.1-desktopfile.patch
+Patch1:		audit-1.6.1-sendmail.patch
+Patch2:		audit-1.7.3-cmd.patch
+Patch3:		audit-1.7.2-avc.patch
+Patch4:		audit-1.7.3-prelude.patch
 # need proper kernel headers
-BuildRequires: glibc-devel >= 2.6
-BuildRequires: gettext-devel intltool libtool swig python-devel
-BuildRequires: openldap-devel
+BuildRequires:	glibc-devel >= 2.6
+BuildRequires:	gettext-devel intltool libtool swig python-devel
+BuildRequires:	openldap-devel
 %py_requires -d
 Requires(preun): rpm-helper
 Requires(post): rpm-helper
 # has the mandriva-simple-auth pam config file we link to
-Requires: usermode-consoleonly >= 1.92-4mdv2008.0
-BuildRequires: prelude-devel >= 0.9.16
+Requires:	usermode-consoleonly >= 1.92-4
+BuildRequires:	prelude-devel >= 0.9.16
+BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
 The audit package contains the user space utilities for storing and
 searching the audit records generate by the audit subsystem in the
 Linux 2.6 kernel.
 
-%package -n %{libname}%{major}
-Summary: Main libraries for %{name}
-Group: System/Libraries
+%package -n	%{libname}%{major}
+Summary:	Main libraries for %{name}
+Group:		System/Libraries
 
-%description -n %{libname}%{major}
+%description -n	%{libname}%{major}
 This package contains the main libraries for %{name}.
 
-%package -n system-config-audit
-Summary: Audit GUI configuration tool
-Group: System/Base
-Obsoletes: %{libname}-common < 1.6.1
+%package -n	system-config-audit
+Summary:	Audit GUI configuration tool
+Group:		System/Base
+Obsoletes:	%{libname}-common < 1.6.1
 # moved some files from there to here
-Conflicts: %{name} < 1.6.1
-Requires: python-audit
-Requires: pygtk2.0-libglade
-Requires: audit
-Requires: usermode-consoleonly >= 1.92-4mdv2008.0
+Conflicts:	%{name} < 1.6.1
+Requires:	python-audit
+Requires:	pygtk2.0-libglade
+Requires:	audit
+Requires:	usermode-consoleonly >= 1.92-4
 
-%description -n system-config-audit
+%description -n	system-config-audit
 This package contains a GUI for configuring the Audit system.
 
-%package -n %devellibname
-Summary: Development files for %{name}
-Group: Development/C
-Requires: %{libname}%{major} = %{version}
-Provides: libaudit-devel = %{version}-%{release}
-Provides: audit-devel = %{version}-%{release}
-Provides: audit-libs-devel = %{version}-%{release}
-Obsoletes: %{libname}0-devel
+%package -n	%devellibname
+Summary:	Development files for %{name}
+Group:		Development/C
+Requires:	%{libname}%{major} = %{version}
+Provides:	libaudit-devel = %{version}-%{release}
+Provides:	audit-devel = %{version}-%{release}
+Provides:	audit-libs-devel = %{version}-%{release}
+Obsoletes:	%{libname}0-devel
 
-%description -n %devellibname
+%description -n	%devellibname
 This package contains development files for %{name}.
 
-%package -n %{libname}-static-devel
-Summary: Static libraries for %{name}
-Requires: %devellibname = %{version}
-Group: Development/C
-Provides: audit-static-devel = %{version}-%{release}
-Provides: audit-libs-static-devel = %{version}-%{release}
-Obsoletes: %{libname}0-static-devel
+%package -n	%{libname}-static-devel
+Summary:	Static libraries for %{name}
+Requires:	%devellibname = %{version}
+Group:		Development/C
+Provides:	audit-static-devel = %{version}-%{release}
+Provides:	audit-libs-static-devel = %{version}-%{release}
+Obsoletes:	%{libname}0-static-devel
 
-%description -n %{libname}-static-devel
+%description -n	%{libname}-static-devel
 This package contains static libraries for %{name} used for
 development.
 
-%package -n python-audit
-Summary: Python bindings for %{name}
-Group: Development/Python
+%package -n	python-audit
+Summary:	Python bindings for %{name}
+Group:		Development/Python
 
-%description -n python-audit
+%description -n	python-audit
 This package contains python bindings for %{name}.
 
-%package -n audispd-plugins
-Summary: Plugins for the audit event dispatcher
-Group: System/Base
-Requires: %{name} = %{version}
-Requires: %{libname}%{major} = %{version}
-Requires: openldap
+%package -n	audispd-plugins
+Summary:	Plugins for the audit event dispatcher
+Group:		System/Base
+Requires:	%{name} = %{version}
+Requires:	%{libname}%{major} = %{version}
+Requires:	openldap
 
-%description -n audispd-plugins
+%description -n	audispd-plugins
 The audispd-plugins package provides plugins for the real-time
 interface to the audit system, audispd. These plugins can do things
 like relay events to remote machines or analyze events for suspicious
@@ -100,7 +102,9 @@ behavior.
 %setup -q
 %patch0 -p1 -b .misc
 %patch1 -p1
-%patch2 -p1 -b .cve-2008-1628
+%patch2 -p1
+%patch3 -p1
+%patch4 -p1
 
 find -type d -name ".libs" | xargs rm -rf
 
@@ -131,15 +135,12 @@ popd
 %find_lang system-config-audit
 
 # uneeded files
-rm -f %{buildroot}%py_platsitedir/*.{a,la}
+rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
 
 # let's use our own pam config
 rm -f %{buildroot}%{_sysconfdir}/pam.d/system-config-audit-server
 ln -s %{_sysconfdir}/pam.d/mandriva-simple-auth \
         %{buildroot}%{_sysconfdir}/pam.d/system-config-audit-server
-
-%clean
-rm -rf %{buildroot}
 
 %post -n %{libname}%{major} -p /sbin/ldconfig
 
@@ -151,9 +152,12 @@ rm -rf %{buildroot}
 %preun
 %_preun_service auditd
 
+%clean
+rm -rf %{buildroot}
+
 %files
 %defattr(-,root,root)
-%doc README COPYING
+%doc README COPYING contrib/capp.rules contrib/nispom.rules contrib/lspp.rules contrib/stig.rules init.d/auditd.cron
 %{_initrddir}/auditd
 %attr(0750,root,root) %dir %{_sysconfdir}/audit
 %attr(0750,root,root) %dir %{_sysconfdir}/audisp
@@ -164,24 +168,25 @@ rm -rf %{buildroot}
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/sysconfig/auditd
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audispd.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/af_unix.conf
+%attr(0750,root,root) /sbin/audispd
 %attr(0750,root,root) /sbin/auditctl
 %attr(0750,root,root) /sbin/auditd
-%attr(0755,root,root) /sbin/ausearch
-%attr(0755,root,root) /sbin/aureport
 %attr(0750,root,root) /sbin/autrace
-%attr(0750,root,root) /sbin/audispd
-%attr(0750,root,root) /sbin/aulastlog
+%attr(0755,root,root) /sbin/aureport
+%attr(0755,root,root) /sbin/ausearch
+%attr(0750,root,root) %{_bindir}/aulastlog
+%attr(0755,root,root) %{_bindir}/ausyscall
+%attr(0644,root,root) %{_mandir}/man5/audispd.conf.5*
+%attr(0644,root,root) %{_mandir}/man5/auditd.conf.5*
 %attr(0644,root,root) %{_mandir}/man8/audispd.8*
 %attr(0644,root,root) %{_mandir}/man8/auditctl.8*
 %attr(0644,root,root) %{_mandir}/man8/auditd.8*
+%attr(0644,root,root) %{_mandir}/man8/aulastlog.8*
 %attr(0644,root,root) %{_mandir}/man8/aureport.8*
 %attr(0644,root,root) %{_mandir}/man8/ausearch.8*
+%attr(0644,root,root) %{_mandir}/man8/ausyscall.8*
 %attr(0644,root,root) %{_mandir}/man8/autrace.8*
-%attr(0644,root,root) %{_mandir}/man8/aulastlog.8*
-%attr(0644,root,root) %{_mandir}/man5/auditd.conf.5*
-%attr(0644,root,root) %{_mandir}/man5/audispd.conf.5*
 %attr(0700,root,root) %dir %{_var}/log/audit
-
 
 %files -n system-config-audit -f system-config-audit.lang
 %defattr(-,root,root)
@@ -202,11 +207,12 @@ rm -rf %{buildroot}
 
 %files -n %devellibname
 %defattr(-,root,root)
-%doc ChangeLog
+%doc ChangeLog contrib/skeleton.c contrib/plugin
 /%{_lib}/lib*.so
 /%{_lib}/lib*.la
 %{_includedir}/*
 %{_mandir}/man3/*
+%{_mandir}/man5/ausearch-expression.5*
 
 %files -n %{libname}-static-devel
 %defattr(-,root,root)
@@ -221,11 +227,18 @@ rm -rf %{buildroot}
 %files -n audispd-plugins
 %defattr(-,root,root,-)
 %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/syslog.conf
-%attr(0644,root,root) %{_mandir}/man8/audispd-zos-remote.8*
-%attr(0644,root,root) %{_mandir}/man8/audisp-prelude.8*
-%attr(0644,root,root) %{_mandir}/man5/zos-remote.conf.5*
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audisp-prelude.conf
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audisp-remote.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/audispd-zos-remote.conf
-%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/zos-remote.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/au-prelude.conf
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/au-remote.conf
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/zos-remote.conf
 %attr(0750,root,root) /sbin/audispd-zos-remote
 %attr(0750,root,root) /sbin/audisp-prelude
+%attr(0750,root,root) /sbin/audisp-remote
+%attr(0644,root,root) %{_mandir}/man5/audisp-prelude.conf.5*
+%attr(0644,root,root) %{_mandir}/man5/audisp-remote.conf.5*
+%attr(0644,root,root) %{_mandir}/man5/zos-remote.conf.5*
+%attr(0644,root,root) %{_mandir}/man8/audispd-zos-remote.8*
+%attr(0644,root,root) %{_mandir}/man8/audisp-prelude.8*
+%attr(0644,root,root) %{_mandir}/man8/audisp-remote.8*
