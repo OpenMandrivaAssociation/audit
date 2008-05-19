@@ -4,7 +4,7 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	1.7.2
+Version:	1.7.3
 Release:	%mkrel 1
 License:	LGPLv2+
 Group:		System/Base
@@ -12,9 +12,7 @@ URL:		http://people.redhat.com/sgrubb/audit/
 Source0:	http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
 Patch0:		audit-1.6.1-desktopfile.patch
 Patch1:		audit-1.6.1-sendmail.patch
-Patch2:		audit-1.7.3-cmd.patch
 Patch3:		audit-1.7.2-avc.patch
-Patch4:		audit-1.7.3-prelude.patch
 # need proper kernel headers
 BuildRequires:	glibc-devel >= 2.6
 BuildRequires:	gettext-devel intltool libtool swig python-devel
@@ -102,9 +100,7 @@ behavior.
 %setup -q
 %patch0 -p1 -b .misc
 %patch1 -p1
-%patch2 -p1
 %patch3 -p1
-%patch4 -p1
 
 find -type d -name ".libs" | xargs rm -rf
 
