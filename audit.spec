@@ -138,9 +138,13 @@ rm -f %{buildroot}%{_sysconfdir}/pam.d/system-config-audit-server
 ln -s %{_sysconfdir}/pam.d/mandriva-simple-auth \
         %{buildroot}%{_sysconfdir}/pam.d/system-config-audit-server
 
+%if %mdkversion < 200900
 %post -n %{libname}%{major} -p /sbin/ldconfig
+%endif
 
+%if %mdkversion < 200900
 %postun -n %{libname}%{major} -p /sbin/ldconfig
+%endif
 
 %post
 %_post_service auditd
