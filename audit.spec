@@ -4,8 +4,8 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	1.7.3
-Release:	%mkrel 3
+Version:	1.7.5
+Release:	%mkrel 1
 License:	LGPLv2+
 Group:		System/Base
 URL:		http://people.redhat.com/sgrubb/audit/
@@ -105,7 +105,7 @@ behavior.
 find -type d -name ".libs" | xargs rm -rf
 
 %build
-./autogen.sh
+%serverbuild
 
 %configure2_5x \
     --sbindir=/sbin \
@@ -221,7 +221,6 @@ rm -rf %{buildroot}
 %files -n python-audit
 %defattr(-,root,root)
 %{py_platsitedir}/*.so
-%{py_platsitedir}/auparse*.egg-info
 %{py_purelibdir}/site-packages/audit.p*
 
 %files -n audispd-plugins
