@@ -1,11 +1,12 @@
 %define major 0
-%define libname %mklibname audit
-%define devellibname %mklibname -d %name
+%define libname %mklibname audit %{major}
+%define develname %mklibname -d audit
+%define staticdevelname %mklibname -d -s audit
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	1.7.5
-Release:	%mkrel 1
+Version:	1.7.6
+Release:	%mkrel 0.1
 License:	LGPLv2+
 Group:		System/Base
 URL:		http://people.redhat.com/sgrubb/audit/
@@ -14,33 +15,39 @@ Patch0:		audit-1.6.1-desktopfile.patch
 Patch1:		audit-1.6.1-sendmail.patch
 Patch3:		audit-1.7.2-avc.patch
 # need proper kernel headers
+BuildRequires:	gettext-devel
 BuildRequires:	glibc-devel >= 2.6
-BuildRequires:	gettext-devel intltool libtool swig python-devel
+BuildRequires:	intltool
+BuildRequires:	krb5-devel
+BuildRequires:	libtool
 BuildRequires:	openldap-devel
+BuildRequires:	prelude-devel >= 0.9.16
+BuildRequires:	python-devel
+BuildRequires:	swig
+BuildRequires:	tcp_wrappers-devel
 %py_requires -d
 Requires(preun): rpm-helper
 Requires(post): rpm-helper
 # has the mandriva-simple-auth pam config file we link to
 Requires:	usermode-consoleonly >= 1.92-4
-BuildRequires:	prelude-devel >= 0.9.16
+Requires:	tcp_wrappers
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
-The audit package contains the user space utilities for storing and
-searching the audit records generate by the audit subsystem in the
-Linux 2.6 kernel.
+The audit package contains the user space utilities for storing and searching
+the audit records generate by the audit subsystem in the Linux 2.6 kernel.
 
-%package -n	%{libname}%{major}
+%package -n	%{libname}
 Summary:	Main libraries for %{name}
 Group:		System/Libraries
 
-%description -n	%{libname}%{major}
+%description -n	%{libname}
 This package contains the main libraries for %{name}.
 
 %package -n	system-config-audit
 Summary:	Audit GUI configuration tool
 Group:		System/Base
-Obsoletes:	%{libname}-common < 1.6.1
+Obsoletes:	lib%{name}-common < 1.6.1
 # moved some files from there to here
 Conflicts:	%{name} < 1.6.1
 Requires:	python-audit
@@ -51,27 +58,27 @@ Requires:	usermode-consoleonly >= 1.92-4
 %description -n	system-config-audit
 This package contains a GUI for configuring the Audit system.
 
-%package -n	%devellibname
+%package -n	%{develname}
 Summary:	Development files for %{name}
 Group:		Development/C
-Requires:	%{libname}%{major} = %{version}
+Requires:	%{libname} = %{version}
 Provides:	libaudit-devel = %{version}-%{release}
 Provides:	audit-devel = %{version}-%{release}
 Provides:	audit-libs-devel = %{version}-%{release}
-Obsoletes:	%{libname}0-devel
+Obsoletes:	%{mklibname audit 0 -d}
 
-%description -n	%devellibname
+%description -n	%{develname}
 This package contains development files for %{name}.
 
-%package -n	%{libname}-static-devel
+%package -n	%{staticdevelname}
 Summary:	Static libraries for %{name}
-Requires:	%devellibname = %{version}
+Requires:	%{develname} = %{version}
 Group:		Development/C
 Provides:	audit-static-devel = %{version}-%{release}
 Provides:	audit-libs-static-devel = %{version}-%{release}
-Obsoletes:	%{libname}0-static-devel
+Obsoletes:	%{mklibname audit 0 -d -s}
 
-%description -n	%{libname}-static-devel
+%description -n	%{staticdevelname}
 This package contains static libraries for %{name} used for
 development.
 
@@ -86,14 +93,13 @@ This package contains python bindings for %{name}.
 Summary:	Plugins for the audit event dispatcher
 Group:		System/Base
 Requires:	%{name} = %{version}
-Requires:	%{libname}%{major} = %{version}
+Requires:	%{libname} = %{version}
 Requires:	openldap
 
 %description -n	audispd-plugins
-The audispd-plugins package provides plugins for the real-time
-interface to the audit system, audispd. These plugins can do things
-like relay events to remote machines or analyze events for suspicious
-behavior.
+The audispd-plugins package provides plugins for the real-time interface to the
+audit system, audispd. These plugins can do things like relay events to remote
+machines or analyze events for suspicious behavior.
 
 %prep
 
@@ -112,6 +118,8 @@ find -type d -name ".libs" | xargs rm -rf
     --libdir=/%{_lib} \
     --with-apparmor \
     --with-prelude \
+    --with-libwrap \
+    --enable-gssapi-krb5 \
     --libexecdir=%{_sbindir}
 
 %make
@@ -139,11 +147,11 @@ ln -s %{_sysconfdir}/pam.d/mandriva-simple-auth \
         %{buildroot}%{_sysconfdir}/pam.d/system-config-audit-server
 
 %if %mdkversion < 200900
-%post -n %{libname}%{major} -p /sbin/ldconfig
+%post -n %{libname} -p /sbin/ldconfig
 %endif
 
 %if %mdkversion < 200900
-%postun -n %{libname}%{major} -p /sbin/ldconfig
+%postun -n %{libname} -p /sbin/ldconfig
 %endif
 
 %post
@@ -178,6 +186,7 @@ rm -rf %{buildroot}
 %attr(0755,root,root) %{_bindir}/ausyscall
 %attr(0644,root,root) %{_mandir}/man5/audispd.conf.5*
 %attr(0644,root,root) %{_mandir}/man5/auditd.conf.5*
+%attr(0644,root,root) %{_mandir}/man5/ausearch-expression.5*
 %attr(0644,root,root) %{_mandir}/man8/audispd.8*
 %attr(0644,root,root) %{_mandir}/man8/auditctl.8*
 %attr(0644,root,root) %{_mandir}/man8/auditd.8*
@@ -200,21 +209,20 @@ rm -rf %{buildroot}
 %{_sbindir}/system-config-audit-server-real
 %{_sbindir}/system-config-audit-server
 
-%files -n %{libname}%{major}
+%files -n %{libname}
 %defattr(-,root,root)
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/libaudit.conf
 /%{_lib}/lib*.so.*
 
-%files -n %devellibname
+%files -n %{develname}
 %defattr(-,root,root)
 %doc ChangeLog contrib/skeleton.c contrib/plugin
 /%{_lib}/lib*.so
 /%{_lib}/lib*.la
 %{_includedir}/*
 %{_mandir}/man3/*
-%{_mandir}/man5/ausearch-expression.5*
 
-%files -n %{libname}-static-devel
+%files -n %{staticdevelname}
 %defattr(-,root,root)
 /%{_lib}/lib*.a
 
