@@ -5,8 +5,8 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	1.7.6
-Release:	%mkrel 2
+Version:	1.7.7
+Release:	%mkrel 1
 License:	LGPLv2+
 Group:		System/Base
 URL:		http://people.redhat.com/sgrubb/audit/
@@ -14,8 +14,6 @@ Source0:	http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
 Patch0:		audit-1.6.1-desktopfile.patch
 Patch1:		audit-1.6.1-sendmail.patch
 Patch3:		audit-1.7.2-avc.patch
-Patch4:		audit-r96.diff
-Patch5:		audit-tcp_wrappers_fix.diff
 # need proper kernel headers
 BuildRequires:	gettext-devel
 BuildRequires:	glibc-devel >= 2.6
@@ -109,8 +107,6 @@ machines or analyze events for suspicious behavior.
 %patch0 -p1 -b .misc
 %patch1 -p1
 %patch3 -p1
-%patch4 -p0
-%patch5 -p0
 
 find -type d -name ".libs" | xargs rm -rf
 
