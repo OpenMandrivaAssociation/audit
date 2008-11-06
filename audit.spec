@@ -5,7 +5,7 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	1.7.8
+Version:	1.7.9
 Release:	%mkrel 1
 License:	LGPLv2+
 Group:		System/Base
@@ -183,6 +183,7 @@ rm -rf %{buildroot}
 %attr(0755,root,root) /sbin/aureport
 %attr(0755,root,root) /sbin/ausearch
 %attr(0750,root,root) %{_bindir}/aulastlog
+%attr(0755,root,root) %{_bindir}/aulast
 %attr(0755,root,root) %{_bindir}/ausyscall
 %attr(0644,root,root) %{_mandir}/man5/audispd.conf.5*
 %attr(0644,root,root) %{_mandir}/man5/auditd.conf.5*
@@ -190,6 +191,7 @@ rm -rf %{buildroot}
 %attr(0644,root,root) %{_mandir}/man8/audispd.8*
 %attr(0644,root,root) %{_mandir}/man8/auditctl.8*
 %attr(0644,root,root) %{_mandir}/man8/auditd.8*
+%attr(0644,root,root) %{_mandir}/man8/aulast.8*
 %attr(0644,root,root) %{_mandir}/man8/aulastlog.8*
 %attr(0644,root,root) %{_mandir}/man8/aureport.8*
 %attr(0644,root,root) %{_mandir}/man8/ausearch.8*
