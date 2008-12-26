@@ -6,7 +6,7 @@
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
 Version:	1.7.10
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	LGPLv2+
 Group:		System/Base
 URL:		http://people.redhat.com/sgrubb/audit/
@@ -22,10 +22,8 @@ BuildRequires:	krb5-devel
 BuildRequires:	libtool
 BuildRequires:	openldap-devel
 BuildRequires:	prelude-devel >= 0.9.16
-BuildRequires:	python-devel
 BuildRequires:	swig
 BuildRequires:	tcp_wrappers-devel
-%py_requires -d
 Requires(preun): rpm-helper
 Requires(post): rpm-helper
 # has the mandriva-simple-auth pam config file we link to
@@ -54,6 +52,7 @@ Requires:	python-audit
 Requires:	pygtk2.0-libglade
 Requires:	audit
 Requires:	usermode-consoleonly >= 1.92-4
+%py_requires -d
 
 %description -n	system-config-audit
 This package contains a GUI for configuring the Audit system.
