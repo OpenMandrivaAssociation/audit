@@ -5,7 +5,7 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	1.7.11
+Version:	1.7.12
 Release:	%mkrel 1
 License:	LGPLv2+
 Group:		System/Base
@@ -28,6 +28,7 @@ Requires(post): rpm-helper
 # has the mandriva-simple-auth pam config file we link to
 Requires:	usermode-consoleonly >= 1.92-4
 Requires:	tcp_wrappers
+Conflicts:	audispd-plugins < 1.7.11
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
@@ -173,13 +174,14 @@ rm -rf %{buildroot}
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/sysconfig/auditd
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audispd.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/af_unix.conf
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/syslog.conf
 %attr(0750,root,root) /sbin/audispd
 %attr(0750,root,root) /sbin/auditctl
 %attr(0750,root,root) /sbin/auditd
 %attr(0750,root,root) /sbin/autrace
 %attr(0755,root,root) /sbin/aureport
 %attr(0755,root,root) /sbin/ausearch
-%attr(0750,root,root) %{_bindir}/aulastlog
+%attr(0755,root,root) %{_bindir}/aulastlog
 %attr(0755,root,root) %{_bindir}/aulast
 %attr(0755,root,root) %{_bindir}/ausyscall
 %attr(0644,root,root) %{_mandir}/man5/audispd.conf.5*
@@ -232,7 +234,6 @@ rm -rf %{buildroot}
 
 %files -n audispd-plugins
 %defattr(-,root,root,-)
-%attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/syslog.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audisp-prelude.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audisp-remote.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/audispd-zos-remote.conf
