@@ -245,7 +245,7 @@ rm -rf %{buildroot}
 %files -n python-audit
 %defattr(-,root,root)
 %{py_platsitedir}/*.so
-%{py_purelibdir}/site-packages/audit.p*
+%{py_platsitedir}/audit.p*
 
 %files -n audispd-plugins
 %defattr(-,root,root,-)
