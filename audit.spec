@@ -5,8 +5,8 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	1.7.12
-Release:	%mkrel 3
+Version:	1.7.13
+Release:	%mkrel 1
 License:	LGPLv2+
 Group:		System/Base
 URL:		http://people.redhat.com/sgrubb/audit/
@@ -17,11 +17,11 @@ Patch2:		audit-1.7.12-lsb-headers.patch
 # Fedora patches
 # Handle audit=0 boot option for 2.6.29 kernel
 # (RH Bug 487541 -  auditd hangs if booted with audit=0)
-Patch101: audit-1.8-noaudit.patch
+#Patch101: audit-1.8-noaudit.patch
 # Drop some debug code in libev
 Patch102: audit-1.7.12-libev.patch
 # move audit.py file to arch specific python dir
-Patch103: audit-swig.patch
+#Patch103: audit-swig.patch
 
 # need proper kernel headers
 BuildRequires:	gettext-devel
@@ -116,9 +116,9 @@ machines or analyze events for suspicious behavior.
 %patch0 -p1 -b .misc
 %patch1 -p1
 %patch2 -p1
-%patch101 -p2
+#%patch101 -p2
 %patch102 -p1
-%patch103 -p1
+#%patch103 -p1
 
 
 find -type d -name ".libs" | xargs rm -rf
@@ -228,7 +228,7 @@ rm -rf %{buildroot}
 %files -n %{libname}
 %defattr(-,root,root)
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/libaudit.conf
-/%{_lib}/lib*.so.*
+/%{_lib}/lib*.so.%{major}*
 
 %files -n %{develname}
 %defattr(-,root,root)
