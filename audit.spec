@@ -27,7 +27,6 @@ Patch102: audit-1.7.12-libev.patch
 BuildRequires:	gettext-devel
 BuildRequires:	glibc-devel >= 2.6
 BuildRequires:	intltool
-BuildRequires:	krb5-devel
 BuildRequires:	libtool
 BuildRequires:	openldap-devel
 BuildRequires:	prelude-devel >= 0.9.16
@@ -132,7 +131,7 @@ find -type d -name ".libs" | xargs rm -rf
     --with-apparmor \
     --with-prelude \
     --with-libwrap \
-    --enable-gssapi-krb5 \
+    --enable-gssapi-krb5=no \
     --libexecdir=%{_sbindir}
 
 %make
