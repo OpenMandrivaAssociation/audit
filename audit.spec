@@ -1,35 +1,32 @@
-%define major 0
+%define major 1
+%define auparsemajor 0
 %define libname %mklibname audit %{major}
+%define auparselibname %mklibname auparse %{auparsemajor}
 %define develname %mklibname -d audit
 %define staticdevelname %mklibname -d -s audit
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	1.7.13
-Release:	%mkrel 3
+Version:	2.0.4
+Release:	%mkrel 1
 License:	LGPLv2+
 Group:		System/Base
 URL:		http://people.redhat.com/sgrubb/audit/
 Source0:	http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
-Patch0:		audit-1.6.1-desktopfile.patch
-Patch1:		audit-1.6.1-sendmail.patch
-Patch2:		audit-1.7.12-lsb-headers.patch
-# Fedora patches
-# Handle audit=0 boot option for 2.6.29 kernel
-# (RH Bug 487541 -  auditd hangs if booted with audit=0)
-#Patch101: audit-1.8-noaudit.patch
-# Drop some debug code in libev
-Patch102: audit-1.7.12-libev.patch
-# move audit.py file to arch specific python dir
-#Patch103: audit-swig.patch
-
+Patch0:		audit-1.7.12-lsb-headers.patch
+Patch1:		audit-2.0.5-auparse-empty-FILE_ARRAY.patch
+Patch2:		audit-2.0.5-i386-inode.patch
+Patch3:		audit-2.0.5-glibc.patch
+Patch4:		audit-2.0.4-add-needed.patch
 # need proper kernel headers
 BuildRequires:	gettext-devel
 BuildRequires:	glibc-devel >= 2.6
 BuildRequires:	intltool
+BuildRequires:	libcap-ng-devel
 BuildRequires:	libtool
 BuildRequires:	openldap-devel
 BuildRequires:	prelude-devel >= 0.9.16
+BuildRequires:	python-devel
 BuildRequires:	swig
 BuildRequires:	tcp_wrappers-devel
 Requires(preun): rpm-helper
@@ -47,29 +44,24 @@ the audit records generate by the audit subsystem in the Linux 2.6 kernel.
 %package -n	%{libname}
 Summary:	Main libraries for %{name}
 Group:		System/Libraries
+Conflicts:	audit < 2.0
 
 %description -n	%{libname}
 This package contains the main libraries for %{name}.
 
-%package -n	system-config-audit
-Summary:	Audit GUI configuration tool
-Group:		System/Base
-Obsoletes:	lib%{name}-common < 1.6.1
-# moved some files from there to here
-Conflicts:	%{name} < 1.6.1
-Requires:	python-audit
-Requires:	pygtk2.0-libglade
-Requires:	audit
-Requires:	usermode-consoleonly >= 1.92-4
-%py_requires -d
+%package -n	%{auparselibname}
+Summary:	Main libraries for %{name}
+Group:		System/Libraries
+Conflicts:	%{mklibname audit 0} < 2.0
 
-%description -n	system-config-audit
-This package contains a GUI for configuring the Audit system.
+%description -n	%{auparselibname}
+This package contains the main auparse libraries for %{name}.
 
 %package -n	%{develname}
 Summary:	Development files for %{name}
 Group:		Development/C
 Requires:	%{libname} = %{version}
+Requires:	%{auparselibname} = %{version}
 Provides:	libaudit-devel = %{version}-%{release}
 Provides:	audit-devel = %{version}-%{release}
 Provides:	audit-libs-devel = %{version}-%{release}
@@ -112,26 +104,25 @@ machines or analyze events for suspicious behavior.
 %prep
 
 %setup -q
-%patch0 -p1 -b .misc
+%patch0 -p1
 %patch1 -p1
 %patch2 -p1
-#%patch101 -p2
-%patch102 -p1
-#%patch103 -p1
-
+%patch3 -p1
+%patch4 -p1
 
 find -type d -name ".libs" | xargs rm -rf
 
 %build
 %serverbuild
+autoreconf -f -v --install
 
 %configure2_5x \
     --sbindir=/sbin \
     --libdir=/%{_lib} \
-    --with-apparmor \
     --with-prelude \
     --with-libwrap \
     --enable-gssapi-krb5=no \
+    --with-libcap-ng=yes \
     --libexecdir=%{_sbindir}
 
 %make
@@ -144,26 +135,31 @@ install -d %{buildroot}%{_libdir}/audit
 
 %makeinstall_std
 
-pushd system-config-audit
-    %makeinstall_std install-fedora
-popd
-
-%find_lang system-config-audit
+install -d %{buildroot}/%{_libdir}
+# This winds up in the wrong place when libtool is involved
+mv %{buildroot}/%{_lib}/libaudit.a %{buildroot}%{_libdir}/
+mv %{buildroot}/%{_lib}/libauparse.a %{buildroot}%{_libdir}/
+curdir=`pwd`
+cd %{buildroot}/%{_libdir}
+LIBNAME=`basename \`ls %{buildroot}/%{_lib}/libaudit.so.%{major}.*.*\``
+ln -s ../../%{_lib}/$LIBNAME libaudit.so
+LIBNAME=`basename \`ls %{buildroot}/%{_lib}/libauparse.so.%{auparsemajor}.*.*\``
+ln -s ../../%{_lib}/$LIBNAME libauparse.so
+cd $curdir
 
 # uneeded files
+rm -f %{buildroot}/%{_lib}/*.so
+rm -f %{buildroot}/%{_lib}/*.la
 rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
-
-# let's use our own pam config
-rm -f %{buildroot}%{_sysconfdir}/pam.d/system-config-audit-server
-ln -s %{_sysconfdir}/pam.d/mandriva-simple-auth \
-        %{buildroot}%{_sysconfdir}/pam.d/system-config-audit-server
 
 %if %mdkversion < 200900
 %post -n %{libname} -p /sbin/ldconfig
-%endif
 
-%if %mdkversion < 200900
+%post -n %{auparselibname} -p /sbin/ldconfig
+
 %postun -n %{libname} -p /sbin/ldconfig
+
+%postun -n %{auparselibname} -p /sbin/ldconfig
 %endif
 
 %post
@@ -201,6 +197,7 @@ rm -rf %{buildroot}
 %attr(0644,root,root) %{_mandir}/man5/audispd.conf.5*
 %attr(0644,root,root) %{_mandir}/man5/auditd.conf.5*
 %attr(0644,root,root) %{_mandir}/man5/ausearch-expression.5*
+%attr(0644,root,root) %{_mandir}/man7/audit.rules.7*
 %attr(0644,root,root) %{_mandir}/man8/audispd.8*
 %attr(0644,root,root) %{_mandir}/man8/auditctl.8*
 %attr(0644,root,root) %{_mandir}/man8/auditd.8*
@@ -212,34 +209,28 @@ rm -rf %{buildroot}
 %attr(0644,root,root) %{_mandir}/man8/autrace.8*
 %attr(0700,root,root) %dir %{_var}/log/audit
 
-%files -n system-config-audit -f system-config-audit.lang
-%defattr(-,root,root)
-%doc system-config-audit/README system-config-audit/NEWS
-%doc system-config-audit/COPYING system-config-audit/AUTHORS
-%config(noreplace) %{_sysconfdir}/pam.d/system-config-audit-server
-%config(noreplace) %{_sysconfdir}/security/console.apps/system-config-audit-server
-%{_datadir}/applications/system-config-audit.desktop
-%{_datadir}/system-config-audit/
-%{_bindir}/system-config-audit
-%{_sbindir}/system-config-audit-server-real
-%{_sbindir}/system-config-audit-server
-
 %files -n %{libname}
 %defattr(-,root,root)
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/libaudit.conf
-/%{_lib}/lib*.so.%{major}*
+/%{_lib}/libaudit.so.%{major}*
+%attr(0644,root,root) %{_mandir}/man5/libaudit.conf.5*
+
+%files -n %{auparselibname}
+%defattr(-,root,root)
+/%{_lib}/libauparse.so.%{auparsemajor}*
 
 %files -n %{develname}
 %defattr(-,root,root)
 %doc ChangeLog contrib/skeleton.c contrib/plugin
-/%{_lib}/lib*.so
-/%{_lib}/lib*.la
+%{_libdir}/libaudit.so
+%{_libdir}/libauparse.so
 %{_includedir}/*
 %{_mandir}/man3/*
 
 %files -n %{staticdevelname}
 %defattr(-,root,root)
-/%{_lib}/lib*.a
+%{_libdir}/libaudit.a
+%{_libdir}/libauparse.a
 
 %files -n python-audit
 %defattr(-,root,root)
