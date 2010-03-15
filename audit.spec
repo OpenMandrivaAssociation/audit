@@ -1,14 +1,12 @@
 %define major 1
-%define auparsemajor 0
 %define libname %mklibname audit %{major}
-%define auparselibname %mklibname auparse %{auparsemajor}
 %define develname %mklibname -d audit
 %define staticdevelname %mklibname -d -s audit
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
 Version:	2.0.4
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	LGPLv2+
 Group:		System/Base
 URL:		http://people.redhat.com/sgrubb/audit/
@@ -49,19 +47,10 @@ Conflicts:	audit < 2.0
 %description -n	%{libname}
 This package contains the main libraries for %{name}.
 
-%package -n	%{auparselibname}
-Summary:	Main libraries for %{name}
-Group:		System/Libraries
-Conflicts:	%{mklibname audit 0} < 2.0
-
-%description -n	%{auparselibname}
-This package contains the main auparse libraries for %{name}.
-
 %package -n	%{develname}
 Summary:	Development files for %{name}
 Group:		Development/C
 Requires:	%{libname} = %{version}
-Requires:	%{auparselibname} = %{version}
 Provides:	libaudit-devel = %{version}-%{release}
 Provides:	audit-devel = %{version}-%{release}
 Provides:	audit-libs-devel = %{version}-%{release}
@@ -155,11 +144,7 @@ rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
 %if %mdkversion < 200900
 %post -n %{libname} -p /sbin/ldconfig
 
-%post -n %{auparselibname} -p /sbin/ldconfig
-
 %postun -n %{libname} -p /sbin/ldconfig
-
-%postun -n %{auparselibname} -p /sbin/ldconfig
 %endif
 
 %post
@@ -213,11 +198,8 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/libaudit.conf
 /%{_lib}/libaudit.so.%{major}*
+/%{_lib}/libauparse.so.0*
 %attr(0644,root,root) %{_mandir}/man5/libaudit.conf.5*
-
-%files -n %{auparselibname}
-%defattr(-,root,root)
-/%{_lib}/libauparse.so.%{auparsemajor}*
 
 %files -n %{develname}
 %defattr(-,root,root)
