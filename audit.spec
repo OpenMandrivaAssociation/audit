@@ -132,7 +132,7 @@ curdir=`pwd`
 cd %{buildroot}/%{_libdir}
 LIBNAME=`basename \`ls %{buildroot}/%{_lib}/libaudit.so.%{major}.*.*\``
 ln -s ../../%{_lib}/$LIBNAME libaudit.so
-LIBNAME=`basename \`ls %{buildroot}/%{_lib}/libauparse.so.%{auparsemajor}.*.*\``
+LIBNAME=`basename \`ls %{buildroot}/%{_lib}/libauparse.so.0.*.*\``
 ln -s ../../%{_lib}/$LIBNAME libauparse.so
 cd $curdir
 
