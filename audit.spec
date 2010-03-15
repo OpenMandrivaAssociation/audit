@@ -1,12 +1,14 @@
 %define major 1
+%define auparsemajor 0
 %define libname %mklibname audit %{major}
+%define auparselibname %mklibname auparse %{auparsemajor}
 %define develname %mklibname -d audit
 %define staticdevelname %mklibname -d -s audit
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
 Version:	2.0.4
-Release:	%mkrel 2
+Release:	%mkrel 3
 License:	LGPLv2+
 Group:		System/Base
 URL:		http://people.redhat.com/sgrubb/audit/
@@ -33,6 +35,7 @@ Requires(post): rpm-helper
 Requires:	usermode-consoleonly >= 1.92-4
 Requires:	tcp_wrappers
 Conflicts:	audispd-plugins < 1.7.11
+Conflicts:	%{mklibname audit 0}
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
@@ -47,10 +50,19 @@ Conflicts:	audit < 2.0
 %description -n	%{libname}
 This package contains the main libraries for %{name}.
 
+%package -n	%{auparselibname}
+Summary:	Main libraries for %{name}
+Group:		System/Libraries
+Conflicts:	%{mklibname audit 0}
+
+%description -n	%{auparselibname}
+This package contains the main auparse libraries for %{name}.
+
 %package -n	%{develname}
 Summary:	Development files for %{name}
 Group:		Development/C
 Requires:	%{libname} = %{version}
+#Requires:	%{auparselibname} = %{version}
 Provides:	libaudit-devel = %{version}-%{release}
 Provides:	audit-devel = %{version}-%{release}
 Provides:	audit-libs-devel = %{version}-%{release}
@@ -74,6 +86,7 @@ development.
 %package -n	python-audit
 Summary:	Python bindings for %{name}
 Group:		Development/Python
+Conflicts:	%{mklibname audit 0}
 
 %description -n	python-audit
 This package contains python bindings for %{name}.
@@ -84,6 +97,7 @@ Group:		System/Base
 Requires:	%{name} = %{version}
 Requires:	%{libname} = %{version}
 Requires:	openldap
+Conflicts:	%{mklibname audit 0}
 
 %description -n	audispd-plugins
 The audispd-plugins package provides plugins for the real-time interface to the
@@ -132,7 +146,7 @@ curdir=`pwd`
 cd %{buildroot}/%{_libdir}
 LIBNAME=`basename \`ls %{buildroot}/%{_lib}/libaudit.so.%{major}.*.*\``
 ln -s ../../%{_lib}/$LIBNAME libaudit.so
-LIBNAME=`basename \`ls %{buildroot}/%{_lib}/libauparse.so.0.*.*\``
+LIBNAME=`basename \`ls %{buildroot}/%{_lib}/libauparse.so.%{auparsemajor}.*.*\``
 ln -s ../../%{_lib}/$LIBNAME libauparse.so
 cd $curdir
 
@@ -144,7 +158,11 @@ rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
 %if %mdkversion < 200900
 %post -n %{libname} -p /sbin/ldconfig
 
+%post -n %{auparselibname} -p /sbin/ldconfig
+
 %postun -n %{libname} -p /sbin/ldconfig
+
+%postun -n %{auparselibname} -p /sbin/ldconfig
 %endif
 
 %post
@@ -198,8 +216,11 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/libaudit.conf
 /%{_lib}/libaudit.so.%{major}*
-/%{_lib}/libauparse.so.0*
 %attr(0644,root,root) %{_mandir}/man5/libaudit.conf.5*
+
+%files -n %{auparselibname}
+%defattr(-,root,root)
+/%{_lib}/libauparse.so.%{auparsemajor}*
 
 %files -n %{develname}
 %defattr(-,root,root)
