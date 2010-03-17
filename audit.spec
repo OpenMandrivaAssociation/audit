@@ -1,14 +1,17 @@
 %define major 1
-%define auparsemajor 0
 %define libname %mklibname audit %{major}
-%define auparselibname %mklibname auparse %{auparsemajor}
 %define develname %mklibname -d audit
 %define staticdevelname %mklibname -d -s audit
+
+%define auparsemajor 0
+%define auparselibname %mklibname auparse %{auparsemajor}
+%define auparsedevelname %mklibname -d auparse
+%define auparsestaticdevelname %mklibname -d -s auparse
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
 Version:	2.0.4
-Release:	%mkrel 4
+Release:	%mkrel 5
 License:	LGPLv2+
 Group:		System/Base
 URL:		http://people.redhat.com/sgrubb/audit/
@@ -35,7 +38,7 @@ Requires(post): rpm-helper
 Requires:	usermode-consoleonly >= 1.92-4
 Requires:	tcp_wrappers
 Conflicts:	audispd-plugins < 1.7.11
-Conflicts:	%{mklibname audit 0}
+Requires:	%{auparselibname} >= %{version}
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
@@ -50,19 +53,10 @@ Conflicts:	audit < 2.0
 %description -n	%{libname}
 This package contains the main libraries for %{name}.
 
-%package -n	%{auparselibname}
-Summary:	Main libraries for %{name}
-Group:		System/Libraries
-Conflicts:	%{mklibname audit 0}
-
-%description -n	%{auparselibname}
-This package contains the main auparse libraries for %{name}.
-
 %package -n	%{develname}
 Summary:	Development files for %{name}
 Group:		Development/C
 Requires:	%{libname} = %{version}
-Requires:	%{auparselibname} = %{version}
 Provides:	libaudit-devel = %{version}-%{release}
 Provides:	audit-devel = %{version}-%{release}
 Provides:	audit-libs-devel = %{version}-%{release}
@@ -83,10 +77,38 @@ Obsoletes:	%{mklibname audit 0 -d -s}
 This package contains static libraries for %{name} used for
 development.
 
+%package -n	%{auparselibname}
+Summary:	Main libraries for %{name}
+Group:		System/Libraries
+Conflicts:	%{mklibname audit 0} <= 1.7.13
+
+%description -n	%{auparselibname}
+This package contains the main auparse libraries for %{name}.
+
+%package -n	%{auparsedevelname}
+Summary:	Development files for %{name}
+Group:		Development/C
+Requires:	%{auparselibname} = %{version}
+Provides:	auparse-devel = %{version}-%{release}
+Conflicts:	%{mklibname audit 0 -d} <= 1.7.13
+
+%description -n	%{auparsedevelname}
+This package contains development files for %{name}.
+
+%package -n	%{auparsestaticdevelname}
+Summary:	Static libraries for %{name}
+Requires:	%{auparsedevelname} = %{version}
+Group:		Development/C
+Provides:	auparse-static-devel = %{version}-%{release}
+Conflicts:	%{mklibname audit 0 -d -s} <= 1.7.13
+
+%description -n	%{auparsestaticdevelname}
+This package contains static libraries for %{name} used for
+development.
+
 %package -n	python-audit
 Summary:	Python bindings for %{name}
 Group:		Development/Python
-Conflicts:	%{mklibname audit 0}
 
 %description -n	python-audit
 This package contains python bindings for %{name}.
@@ -97,7 +119,6 @@ Group:		System/Base
 Requires:	%{name} = %{version}
 Requires:	%{libname} = %{version}
 Requires:	openldap
-Conflicts:	%{mklibname audit 0}
 
 %description -n	audispd-plugins
 The audispd-plugins package provides plugins for the real-time interface to the
@@ -218,21 +239,34 @@ rm -rf %{buildroot}
 /%{_lib}/libaudit.so.%{major}*
 %attr(0644,root,root) %{_mandir}/man5/libaudit.conf.5*
 
-%files -n %{auparselibname}
-%defattr(-,root,root)
-/%{_lib}/libauparse.so.%{auparsemajor}*
-
 %files -n %{develname}
 %defattr(-,root,root)
 %doc ChangeLog contrib/skeleton.c contrib/plugin
 %{_libdir}/libaudit.so
-%{_libdir}/libauparse.so
-%{_includedir}/*
-%{_mandir}/man3/*
+%{_includedir}/libaudit.h
+%{_mandir}/man3/audit_*
+%{_mandir}/man3/ausearch_*
+%{_mandir}/man3/get_auditfail_action.3*
+%{_mandir}/man3/set_aumessage_mode.3*
 
 %files -n %{staticdevelname}
 %defattr(-,root,root)
 %{_libdir}/libaudit.a
+
+%files -n %{auparselibname}
+%defattr(-,root,root)
+/%{_lib}/libauparse.so.%{auparsemajor}*
+
+%files -n %{auparsedevelname}
+%defattr(-,root,root)
+%doc ChangeLog contrib/skeleton.c contrib/plugin
+%{_libdir}/libauparse.so
+%{_includedir}/auparse-defs.h
+%{_includedir}/auparse.h
+%{_mandir}/man3/auparse_*
+
+%files -n %{auparsestaticdevelname}
+%defattr(-,root,root)
 %{_libdir}/libauparse.a
 
 %files -n python-audit
