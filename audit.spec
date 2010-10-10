@@ -10,17 +10,13 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	2.0.4
-Release:	%mkrel 5
+Version:	2.0.5
+Release:	%mkrel 1
 License:	LGPLv2+
 Group:		System/Base
 URL:		http://people.redhat.com/sgrubb/audit/
 Source0:	http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
 Patch0:		audit-1.7.12-lsb-headers.patch
-Patch1:		audit-2.0.5-auparse-empty-FILE_ARRAY.patch
-Patch2:		audit-2.0.5-i386-inode.patch
-Patch3:		audit-2.0.5-glibc.patch
-Patch4:		audit-2.0.4-add-needed.patch
 # need proper kernel headers
 BuildRequires:	gettext-devel
 BuildRequires:	glibc-devel >= 2.6
@@ -129,10 +125,6 @@ machines or analyze events for suspicious behavior.
 
 %setup -q
 %patch0 -p1
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
 
 find -type d -name ".libs" | xargs rm -rf
 
