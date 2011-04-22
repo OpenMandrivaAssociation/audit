@@ -10,7 +10,7 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	2.0.6
+Version:	2.1.1
 Release:	%mkrel 1
 License:	LGPLv2+
 Group:		System/Base
@@ -148,6 +148,7 @@ rm -rf %{buildroot}
 
 install -d %{buildroot}%{_var}/log/audit
 install -d %{buildroot}%{_libdir}/audit
+install -d %{buildroot}%{_var}/spool/audit
 
 %makeinstall_std
 
@@ -283,3 +284,4 @@ rm -rf %{buildroot}
 %attr(0644,root,root) %{_mandir}/man8/audispd-zos-remote.8*
 %attr(0644,root,root) %{_mandir}/man8/audisp-prelude.8*
 %attr(0644,root,root) %{_mandir}/man8/audisp-remote.8*
+%attr(0750,root,root) %dir %{_var}/spool/audit
