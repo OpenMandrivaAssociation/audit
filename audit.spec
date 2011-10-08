@@ -10,7 +10,7 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	2.1.2
+Version:	2.1.3
 Release:	%mkrel 1
 License:	LGPLv2+
 Group:		System/Base
