@@ -129,8 +129,6 @@ install -d %{buildroot}%{_var}/spool/audit
 
 install -d %{buildroot}/%{_libdir}
 # This winds up in the wrong place when libtool is involved
-mv %{buildroot}/%{_lib}/libaudit.a %{buildroot}%{_libdir}/
-mv %{buildroot}/%{_lib}/libauparse.a %{buildroot}%{_libdir}/
 curdir=`pwd`
 cd %{buildroot}/%{_libdir}
 LIBNAME=`basename \`ls %{buildroot}/%{_lib}/libaudit.so.%{major}.*.*\``
