@@ -8,8 +8,8 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	2.1.3
-Release:	2
+Version:	2.2.1
+Release:	1
 License:	LGPLv2+
 Group:		System/Base
 URL:		http://people.redhat.com/sgrubb/audit/
@@ -167,9 +167,10 @@ rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
 %attr(0750,root,root) /sbin/autrace
 %attr(0755,root,root) /sbin/aureport
 %attr(0755,root,root) /sbin/ausearch
-%attr(0755,root,root) %{_bindir}/aulastlog
 %attr(0755,root,root) %{_bindir}/aulast
+%attr(0755,root,root) %{_bindir}/aulastlog
 %attr(0755,root,root) %{_bindir}/ausyscall
+%attr(0755,root,root) %{_bindir}/auvirt
 %attr(0644,root,root) %{_mandir}/man5/audispd.conf.5*
 %attr(0644,root,root) %{_mandir}/man5/auditd.conf.5*
 %attr(0644,root,root) %{_mandir}/man5/ausearch-expression.5*
@@ -183,6 +184,7 @@ rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
 %attr(0644,root,root) %{_mandir}/man8/ausearch.8*
 %attr(0644,root,root) %{_mandir}/man8/ausyscall.8*
 %attr(0644,root,root) %{_mandir}/man8/autrace.8*
+%attr(0644,root,root) %{_mandir}/man8/auvirt.8*
 %attr(0700,root,root) %dir %{_var}/log/audit
 
 %files -n %{libname}
@@ -230,3 +232,4 @@ rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
 %attr(0644,root,root) %{_mandir}/man8/audisp-prelude.8*
 %attr(0644,root,root) %{_mandir}/man8/audisp-remote.8*
 %attr(0750,root,root) %dir %{_var}/spool/audit
+
