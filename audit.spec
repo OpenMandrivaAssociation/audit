@@ -22,7 +22,7 @@ BuildRequires:	intltool
 BuildRequires:	libcap-ng-devel
 BuildRequires:	autoconf automake libtool
 BuildRequires:	openldap-devel
-BuildRequires:	prelude-devel >= 0.9.16
+#BuildRequires:	prelude-devel >= 0.9.16
 BuildRequires:	python-devel
 BuildRequires:	swig
 BuildRequires:	tcp_wrappers-devel
@@ -110,11 +110,12 @@ autoreconf -f -v --install
     --disable-static \
     --sbindir=/sbin \
     --libdir=/%{_lib} \
-    --with-prelude \
     --with-libwrap \
     --enable-gssapi-krb5=no \
     --with-libcap-ng=yes \
     --libexecdir=%{_sbindir}
+
+#    --with-prelude \
 
 %make
 
@@ -216,20 +217,20 @@ rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
 %{py_platsitedir}/audit.p*
 
 %files -n audispd-plugins
-%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audisp-prelude.conf
+#config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audisp-prelude.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audisp-remote.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/audispd-zos-remote.conf
-%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/au-prelude.conf
+#config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/au-prelude.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/au-remote.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/zos-remote.conf
 %attr(0750,root,root) /sbin/audispd-zos-remote
-%attr(0750,root,root) /sbin/audisp-prelude
+#%attr(0750,root,root) /sbin/audisp-prelude
 %attr(0750,root,root) /sbin/audisp-remote
-%attr(0644,root,root) %{_mandir}/man5/audisp-prelude.conf.5*
+#attr(0644,root,root) %{_mandir}/man5/audisp-prelude.conf.5*
 %attr(0644,root,root) %{_mandir}/man5/audisp-remote.conf.5*
 %attr(0644,root,root) %{_mandir}/man5/zos-remote.conf.5*
 %attr(0644,root,root) %{_mandir}/man8/audispd-zos-remote.8*
-%attr(0644,root,root) %{_mandir}/man8/audisp-prelude.8*
+#attr(0644,root,root) %{_mandir}/man8/audisp-prelude.8*
 %attr(0644,root,root) %{_mandir}/man8/audisp-remote.8*
 %attr(0750,root,root) %dir %{_var}/spool/audit
 
