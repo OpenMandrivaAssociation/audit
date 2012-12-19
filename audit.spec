@@ -191,6 +191,7 @@ rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
 %attr(0755,root,root) %{_bindir}/aulastlog
 %attr(0755,root,root) %{_bindir}/aulast
 %attr(0755,root,root) %{_bindir}/ausyscall
+%attr(0755,root,root) %{_bindir}/auvirt
 %attr(0644,root,root) %{_mandir}/man5/audispd.conf.5*
 %attr(0644,root,root) %{_mandir}/man5/auditd.conf.5*
 %attr(0644,root,root) %{_mandir}/man5/ausearch-expression.5*
@@ -204,6 +205,7 @@ rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
 %attr(0644,root,root) %{_mandir}/man8/ausearch.8*
 %attr(0644,root,root) %{_mandir}/man8/ausyscall.8*
 %attr(0644,root,root) %{_mandir}/man8/autrace.8*
+%attr(0644,root,root) %{_mandir}/man8/auvirt.8*
 %attr(0700,root,root) %dir %{_var}/log/audit
 
 %files -n %{libname}
