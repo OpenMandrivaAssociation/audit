@@ -11,7 +11,7 @@
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
 Version:	2.2.2
-Release:	1
+Release:	2
 License:	LGPLv2+
 Group:		System/Base
 URL:		http://people.redhat.com/sgrubb/audit/
@@ -53,6 +53,7 @@ Summary:	Development files for %{name}
 Group:		Development/C
 Requires:	%{libname} = %{version}
 Provides:	%{name}-devel = %{version}-%{release}
+Provides:	lib%{name}-devel = %{version}-%{release}
 Obsoletes:	%{mklibname audit 0 -d}
 
 %description -n	%{devname}
