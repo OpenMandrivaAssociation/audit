@@ -17,6 +17,7 @@ Group:		System/Base
 URL:		http://people.redhat.com/sgrubb/audit/
 Source0:	http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
 Patch0:		audit-1.7.12-lsb-headers.patch
+Patch1:		audit-2.2.2-automake-1.13-fix.patch
 
 BuildRequires:	intltool
 BuildRequires:	libtool
@@ -124,13 +125,12 @@ machines or analyze events for suspicious behavior.
 %apply_patches
 
 find -type d -name ".libs" | xargs rm -rf
-
-%build
-#fix build with new automake
-sed -i -e 's,AM_CONFIG_HEADER,AC_CONFIG_HEADERS,g' configure.*
-%serverbuild
+ 
 libtoolize --copy --force
 autoreconf -f -v --install
+
+%build
+%serverbuild
 
 %configure2_5x \
     --sbindir=/sbin \
