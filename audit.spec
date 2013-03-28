@@ -1,4 +1,4 @@
-%define major	1
+%define major 1
 %define libname %mklibname audit %{major}
 %define devname %mklibname -d audit
 %define staticdevname %mklibname -d -s audit
@@ -11,12 +11,15 @@
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
 Version:	2.2.2
-Release:	2
+Release:	4
 License:	LGPLv2+
 Group:		System/Base
-URL:		http://people.redhat.com/sgrubb/audit/
-Source0:	http://people.redhat.com/sgrubb/audit/audit-%{version}.tar.gz
+Url:		http://people.redhat.com/sgrubb/audit/
+Source0:	http://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
+Source1:	auditd.service
+Source100:	%{name}.rpmlintrc
 Patch0:		audit-1.7.12-lsb-headers.patch
+Patch1:		audit-2.2.2-automake-1.13-fix.patch
 
 BuildRequires:	intltool
 BuildRequires:	libtool
@@ -28,13 +31,12 @@ BuildRequires:	tcp_wrappers-devel
 BuildRequires:	pkgconfig(libcap-ng)
 BuildRequires:	pkgconfig(libprelude)
 BuildRequires:	pkgconfig(python)
-
-Requires(preun,post): rpm-helper
+BuildRequires:	systemd-units
+Requires(preun,post):	rpm-helper
 # has the mandriva-simple-auth pam config file we link to
 Requires:	usermode-consoleonly >= 1.92-4
 Requires:	tcp_wrappers
 Conflicts:	audispd-plugins < 1.7.11
-Requires:	%{auparselibname} >= %{version}
 
 %description
 The audit package contains the user space utilities for storing and searching
@@ -53,8 +55,6 @@ Summary:	Development files for %{name}
 Group:		Development/C
 Requires:	%{libname} = %{version}
 Provides:	%{name}-devel = %{version}-%{release}
-Provides:	lib%{name}-devel = %{version}-%{release}
-Obsoletes:	%{mklibname audit 0 -d}
 
 %description -n	%{devname}
 This package contains development files for %{name}.
@@ -64,7 +64,6 @@ Summary:	Static libraries for %{name}
 Group:		Development/C
 Requires:	%{devname} = %{version}
 Provides:	audit-static-devel = %{version}-%{release}
-Obsoletes:	%{mklibname audit 0 -d -s}
 
 %description -n	%{staticdevname}
 This package contains static libraries for %{name} used for
@@ -110,7 +109,6 @@ This package contains python bindings for %{name}.
 Summary:	Plugins for the audit event dispatcher
 Group:		System/Base
 Requires:	%{name} = %{version}
-Requires:	%{libname} = %{version}
 Requires:	openldap
 
 %description -n	audispd-plugins
@@ -124,22 +122,21 @@ machines or analyze events for suspicious behavior.
 %apply_patches
 
 find -type d -name ".libs" | xargs rm -rf
-
-%build
-#fix build with new automake
-sed -i -e 's,AM_CONFIG_HEADER,AC_CONFIG_HEADERS,g' configure.*
-%serverbuild
+ 
 libtoolize --copy --force
 autoreconf -f -v --install
 
+%build
+%serverbuild
+
 %configure2_5x \
-    --sbindir=/sbin \
-    --libdir=/%{_lib} \
-    --with-prelude \
-    --with-libwrap \
-    --enable-gssapi-krb5=no \
-    --with-libcap-ng=yes \
-    --libexecdir=%{_sbindir}
+	--sbindir=/sbin \
+	--libdir=/%{_lib} \
+	--with-prelude \
+	--with-libwrap \
+	--enable-gssapi-krb5=no \
+	--with-libcap-ng=yes \
+	--libexecdir=%{_sbindir}
 
 %make
 
@@ -149,7 +146,6 @@ install -d %{buildroot}%{_libdir}/audit
 install -d %{buildroot}%{_var}/spool/audit
 
 %makeinstall_std
-
 install -d %{buildroot}/%{_libdir}
 # This winds up in the wrong place when libtool is involved
 mv %{buildroot}/%{_lib}/libaudit.a %{buildroot}%{_libdir}/
@@ -167,6 +163,11 @@ rm -f %{buildroot}/%{_lib}/*.so
 rm -f %{buildroot}/%{_lib}/*.la
 rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
 
+mkdir -p %{buildroot}%{_unitdir}
+install -m644 %{SOURCE1} %{buildroot}%{_unitdir}/auditd.service
+rm -rf %{_initrddir}/*
+
+
 %post
 %_post_service auditd
 
@@ -175,7 +176,7 @@ rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
 
 %files
 %doc README COPYING contrib/capp.rules contrib/nispom.rules contrib/lspp.rules contrib/stig.rules init.d/auditd.cron
-%{_initrddir}/auditd
+%{_unitdir}/auditd.service
 %attr(0750,root,root) %dir %{_sysconfdir}/audit
 %attr(0750,root,root) %dir %{_sysconfdir}/audisp
 %attr(0750,root,root) %dir %{_sysconfdir}/audisp/plugins.d
