@@ -10,16 +10,14 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	2.2.2
-Release:	4
+Version:	2.2.3
+Release:	1
 License:	LGPLv2+
 Group:		System/Base
 Url:		http://people.redhat.com/sgrubb/audit/
 Source0:	http://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
-Source1:	auditd.service
 Source100:	%{name}.rpmlintrc
-Patch0:		audit-1.7.12-lsb-headers.patch
-Patch1:		audit-2.2.2-automake-1.13-fix.patch
+Patch1:		audit-2.2.4-clone.patch
 
 BuildRequires:	intltool
 BuildRequires:	libtool
@@ -122,16 +120,19 @@ machines or analyze events for suspicious behavior.
 %apply_patches
 
 find -type d -name ".libs" | xargs rm -rf
- 
-libtoolize --copy --force
-autoreconf -f -v --install
+
 
 %build
+#fix build with new automake
+sed -i -e 's,AM_CONFIG_HEADER,AC_CONFIG_HEADERS,g' configure.* 
+libtoolize --copy --force
+autoreconf -f -v --install
 %serverbuild
 
 %configure2_5x \
 	--sbindir=/sbin \
 	--libdir=/%{_lib} \
+	--enable-systemd \
 	--with-prelude \
 	--with-libwrap \
 	--enable-gssapi-krb5=no \
@@ -158,15 +159,13 @@ LIBNAME=`basename \`ls %{buildroot}/%{_lib}/libauparse.so.%{auparsemajor}.*.*\``
 ln -s ../../%{_lib}/$LIBNAME libauparse.so
 cd $curdir
 
+mkdir -p %{buildroot}%{_unitdir}
+mv %{buildroot}/%{_prefix}/lib/systemd/system/auditd.service %{buildroot}%{_unitdir}
+
 # uneeded files
 rm -f %{buildroot}/%{_lib}/*.so
 rm -f %{buildroot}/%{_lib}/*.la
 rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
-
-mkdir -p %{buildroot}%{_unitdir}
-install -m644 %{SOURCE1} %{buildroot}%{_unitdir}/auditd.service
-rm -rf %{_initrddir}/*
-
 
 %post
 %_post_service auditd
@@ -183,7 +182,6 @@ rm -rf %{_initrddir}/*
 %attr(0750,root,root) %dir %{_libdir}/audit
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/auditd.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/audit.rules
-%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/sysconfig/auditd
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audispd.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/af_unix.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/syslog.conf
