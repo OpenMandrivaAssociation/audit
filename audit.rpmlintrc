@@ -1,1 +1,4 @@
-addFilter("malformed-line-in-lsb-comment-block.*")
+# Intentional -- for security purposes
+addFilter("E: non-standard-executable-perm")
+addFilter("E: non-standard-dir-perm")
+addFilter("E: non-readable")
