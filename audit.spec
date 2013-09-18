@@ -10,14 +10,13 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	2.2.3
-Release:	2
+Version:	2.3.2
+Release:	1
 License:	LGPLv2+
 Group:		System/Base
 Url:		http://people.redhat.com/sgrubb/audit/
 Source0:	http://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
 Source100:	%{name}.rpmlintrc
-Patch1:		audit-2.2.4-clone.patch
 
 BuildRequires:	intltool
 BuildRequires:	libtool
@@ -134,6 +133,7 @@ autoreconf -f -v --install
 	--libdir=/%{_lib} \
 	--enable-systemd \
 	--with-prelude \
+	--enable-static \
 	--with-libwrap \
 	--enable-gssapi-krb5=no \
 	--with-libcap-ng=yes \
@@ -168,6 +168,10 @@ rm -f %{buildroot}/%{_lib}/*.la
 rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
 
 %post
+# Copy default rules into place on new installation
+if [ ! -e /etc/audit/audit.rules ] ; then
+	cp /etc/audit/rules.d/audit.rules /etc/audit/audit.rules
+fi
 %_post_service auditd
 
 %preun
@@ -181,7 +185,7 @@ rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
 %attr(0750,root,root) %dir %{_sysconfdir}/audisp/plugins.d
 %attr(0750,root,root) %dir %{_libdir}/audit
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/auditd.conf
-%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/audit.rules
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/rules.d/audit.rules
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audispd.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/af_unix.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/syslog.conf
@@ -191,6 +195,8 @@ rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
 %attr(0750,root,root) /sbin/autrace
 %attr(0755,root,root) /sbin/aureport
 %attr(0755,root,root) /sbin/ausearch
+%attr(0755,root,root) /sbin/augenrules
+%attr(0755,root,root) %{_sbindir}/initscripts/legacy-actions/auditd/*
 %attr(0755,root,root) %{_bindir}/aulastlog
 %attr(0755,root,root) %{_bindir}/aulast
 %attr(0755,root,root) %{_bindir}/ausyscall
@@ -209,6 +215,7 @@ rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
 %attr(0644,root,root) %{_mandir}/man8/ausyscall.8*
 %attr(0644,root,root) %{_mandir}/man8/autrace.8*
 %attr(0644,root,root) %{_mandir}/man8/auvirt.8*
+%attr(6444,root,root) %{_mandir}/man8/augenrules.8*
 %attr(0700,root,root) %dir %{_var}/log/audit
 
 %files -n %{libname}
