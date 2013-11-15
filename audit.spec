@@ -126,7 +126,10 @@ machines or analyze events for suspicious behavior.
 find -type d -name ".libs" | xargs rm -rf
 
 %build
+#fix build with new automake
+sed -i -e 's,AM_CONFIG_HEADER,AC_CONFIG_HEADERS,g' configure.*
 %serverbuild
+libtoolize --copy --force
 autoreconf -f -v --install
 
 %configure2_5x \
