@@ -17,6 +17,7 @@ Group:		System/Base
 Url:		http://people.redhat.com/sgrubb/audit/
 Source0:	http://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
 Source100:	%{name}.rpmlintrc
+Patch0:		audit-for-cross-compiling.patch
 
 BuildRequires:	intltool
 BuildRequires:	libtool
@@ -136,6 +137,9 @@ autoreconf -f -v --install
 	--enable-static \
 	--with-libwrap \
 	--enable-gssapi-krb5=no \
+%ifarch aarch64
+	--with-aarch64 \
+%endif
 	--with-libcap-ng=yes \
 	--libexecdir=%{_sbindir}
 
