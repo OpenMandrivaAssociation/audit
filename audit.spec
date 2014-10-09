@@ -10,8 +10,8 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	2.3.2
-Release:	7
+Version:	2.4
+Release:	1
 License:	LGPLv2+
 Group:		System/Base
 Url:		http://people.redhat.com/sgrubb/audit/
@@ -190,6 +190,7 @@ fi
 %attr(0750,root,root) %dir %{_libdir}/audit
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/auditd.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/rules.d/audit.rules
+%ghost %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/audit.rules
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audispd.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/af_unix.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/syslog.conf
@@ -231,6 +232,7 @@ fi
 %doc ChangeLog contrib/skeleton.c contrib/plugin
 %{_libdir}/libaudit.so
 %{_includedir}/libaudit.h
+%{_libdir}/pkgconfig/audit.pc
 %{_mandir}/man3/audit_*
 %{_mandir}/man3/ausearch_*
 %{_mandir}/man3/get_auditfail_action.3*
