@@ -1,5 +1,7 @@
 removed_sources:
   audit-2.2.2.tar.gz: 5732cd30629b57ce8b26a93944ca3a625d2f1f98
   audit-2.2.3.tar.gz: cdb2721d4e9361648359032a4d40d2c057abfe58
-sources:
   audit-2.3.2.tar.gz: fb135dc049b3cc60843045fd67fa9704b4aba67a
+
+sources:
+  audit-2.4.tar.gz: 4cddd98eff5d6fc53dccaa845d87ba560b77cf82
