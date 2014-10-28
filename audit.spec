@@ -11,12 +11,13 @@
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
 Version:	2.4
-Release:	1
+Release:	2
 License:	LGPLv2+
 Group:		System/Base
 Url:		http://people.redhat.com/sgrubb/audit/
 Source0:	http://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
 Patch0:		audit-2.4-python-static.patch
+Patch1:		audit-2.4-inline-semantics.patch
 Source100:	%{name}.rpmlintrc
 
 BuildRequires:	intltool
@@ -128,8 +129,6 @@ sed -i -e 's,AM_CONFIG_HEADER,AC_CONFIG_HEADERS,g' configure.*
 libtoolize --copy --force
 autoreconf -f -v --install
 %setup_compile_flags
-export CC=gcc
-export CXX=g++
 export PYTHON=%{__python2}
 %configure \
 	--sbindir=/sbin \
