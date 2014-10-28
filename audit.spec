@@ -27,7 +27,7 @@ BuildRequires:	openldap-devel
 BuildRequires:	tcp_wrappers-devel
 BuildRequires:	pkgconfig(libcap-ng)
 BuildRequires:	pkgconfig(libprelude)
-BuildRequires:	pkgconfig(python)
+BuildRequires:	pkgconfig(python2)
 BuildRequires:	systemd-units
 Requires(preun,post):	rpm-helper
 # has the mandriva-simple-auth pam config file we link to
@@ -95,12 +95,12 @@ Conflicts:	%{mklibname audit 0 -d -s} <= 1.7.13
 This package contains static libraries for %{name} used for
 development.
 
-%package -n	python-audit
+%package -n	python2-audit
 Summary:	Python bindings for %{name}
 Group:		Development/Python
 
-%description -n	python-audit
-This package contains python bindings for %{name}.
+%description -n	python2-audit
+This package contains python2 bindings for %{name}.
 
 %package -n	audispd-plugins
 Summary:	Plugins for the audit event dispatcher
@@ -196,7 +196,7 @@ fi
 %attr(0750,root,root) %dir %{_libdir}/audit
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/auditd.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/rules.d/audit.rules
-%ghost %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/audit.rules
+%optional %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/audit.rules
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audispd.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/af_unix.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/syslog.conf
@@ -260,9 +260,9 @@ fi
 %files -n %{auparsestaticdevname}
 %{_libdir}/libauparse.a
 
-%files -n python-audit
-%{py_platsitedir}/*.so
-%{py_platsitedir}/audit.p*
+%files -n python2-audit
+%{py2_platsitedir}/*.so
+%{py2_platsitedir}/audit.p*
 
 %files -n audispd-plugins
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audisp-prelude.conf
