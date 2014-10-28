@@ -126,7 +126,9 @@ find -type d -name ".libs" | xargs rm -rf
 sed -i -e 's,AM_CONFIG_HEADER,AC_CONFIG_HEADERS,g' configure.* 
 libtoolize --copy --force
 autoreconf -f -v --install
-%serverbuild
+%setup_compile_flags
+export CC=gcc
+export CXX=g++
 
 %configure \
 	--sbindir=/sbin \
@@ -165,6 +167,10 @@ cd $curdir
 mkdir -p %{buildroot}%{_unitdir}
 mv %{buildroot}/%{_prefix}/lib/systemd/system/auditd.service %{buildroot}%{_unitdir}
 
+# Move the pkgconfig file
+mv %{buildroot}/%{_lib}/pkgconfig %{buildroot}%{_libdir}
+
+
 # uneeded files
 rm -f %{buildroot}/%{_lib}/*.so
 rm -f %{buildroot}/%{_lib}/*.la
@@ -184,6 +190,7 @@ fi
 %doc README COPYING contrib/capp.rules contrib/nispom.rules contrib/lspp.rules contrib/stig.rules init.d/auditd.cron
 %{_unitdir}/auditd.service
 %attr(0750,root,root) %dir %{_sysconfdir}/audit
+%attr(0750,root,root) %dir %{_sysconfdir}/audit/rules.d
 %attr(0750,root,root) %dir %{_sysconfdir}/audisp
 %attr(0750,root,root) %dir %{_sysconfdir}/audisp/plugins.d
 %attr(0750,root,root) %dir %{_libdir}/audit
