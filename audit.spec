@@ -16,6 +16,7 @@ License:	LGPLv2+
 Group:		System/Base
 Url:		http://people.redhat.com/sgrubb/audit/
 Source0:	http://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
+Patch0:		audit-2.4-python-static.patch
 Source100:	%{name}.rpmlintrc
 
 BuildRequires:	intltool
@@ -129,7 +130,7 @@ autoreconf -f -v --install
 %setup_compile_flags
 export CC=gcc
 export CXX=g++
-
+export PYTHON=%{__python2}
 %configure \
 	--sbindir=/sbin \
 	--libdir=/%{_lib} \
