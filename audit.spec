@@ -17,7 +17,6 @@ Group:		System/Base
 Url:		http://people.redhat.com/sgrubb/audit/
 Source0:	http://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
 Source100:	%{name}.rpmlintrc
-Patch0:		audit-for-cross-compiling.patch
 
 BuildRequires:	intltool
 BuildRequires:	libtool
@@ -129,7 +128,7 @@ libtoolize --copy --force
 autoreconf -f -v --install
 %serverbuild
 
-%configure2_5x \
+%configure \
 	--sbindir=/sbin \
 	--libdir=/%{_lib} \
 	--enable-systemd \
@@ -275,4 +274,3 @@ fi
 %attr(0644,root,root) %{_mandir}/man8/audisp-prelude.8*
 %attr(0644,root,root) %{_mandir}/man8/audisp-remote.8*
 %attr(0750,root,root) %dir %{_var}/spool/audit
-
