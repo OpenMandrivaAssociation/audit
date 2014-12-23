@@ -31,6 +31,8 @@ BuildRequires:	pkgconfig(libcap-ng)
 BuildRequires:	pkgconfig(libprelude)
 BuildRequires:	pkgconfig(python2)
 BuildRequires:	systemd-units
+BuildRequires:	gcc-c++, gcc, gcc-cpp
+
 Requires(preun,post):	rpm-helper
 # has the mandriva-simple-auth pam config file we link to
 Requires:	usermode-consoleonly >= 1.92-4
@@ -130,6 +132,10 @@ libtoolize --copy --force
 autoreconf -f -v --install
 %setup_compile_flags
 export PYTHON=%{__python2}
+#gcc-ed this too. Sflo
+export CC=gcc
+export CXX=g++
+
 %configure \
 	--sbindir=/sbin \
 	--libdir=/%{_lib} \
