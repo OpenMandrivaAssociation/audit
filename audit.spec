@@ -16,7 +16,7 @@ License:	LGPLv2+
 Group:		System/Base
 Url:		http://people.redhat.com/sgrubb/audit/
 Source0:	http://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
-Patch0:		audit-2.4-python-static.patch
+Patch0:		audit-2.4.2-python-static.patch
 Patch1:		audit-2.4-inline-semantics.patch
 Source100:	%{name}.rpmlintrc
 
