@@ -3,6 +3,9 @@
 %define devname %mklibname -d audit
 %define staticdevname %mklibname -d -s audit
 
+%define _disable_ld_no_undefined 1
+%define _disable_lto 1
+
 %define auparsemajor 0
 %define auparselibname %mklibname auparse %{auparsemajor}
 %define auparsedevname %mklibname -d auparse
@@ -10,14 +13,12 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	2.4.2
-Release:	3
+Version:	2.4.4
+Release:	1
 License:	LGPLv2+
 Group:		System/Base
 Url:		http://people.redhat.com/sgrubb/audit/
 Source0:	http://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
-Patch0:		audit-2.4.2-python-static.patch
-Patch1:		audit-2.4-inline-semantics.patch
 Source100:	%{name}.rpmlintrc
 
 BuildRequires:	intltool
@@ -30,6 +31,7 @@ BuildRequires:	tcp_wrappers-devel
 BuildRequires:	pkgconfig(libcap-ng)
 BuildRequires:	pkgconfig(libprelude)
 BuildRequires:	pkgconfig(python2)
+BuildRequires:	pkgconfig(python3)
 BuildRequires:	systemd-units
 BuildRequires:	gcc-c++, gcc, gcc-cpp
 
@@ -106,6 +108,13 @@ Group:		Development/Python
 %description -n	python2-audit
 This package contains python2 bindings for %{name}.
 
+%package -n     python-audit
+Summary:        Python bindings for %{name}
+Group:          Development/Python
+
+%description -n python-audit
+This package contains python3 bindings for %{name}.
+
 %package -n	audispd-plugins
 Summary:	Plugins for the audit event dispatcher
 Group:		System/Base
@@ -128,13 +137,10 @@ find -type d -name ".libs" | xargs rm -rf
 %build
 #fix build with new automake
 sed -i -e 's,AM_CONFIG_HEADER,AC_CONFIG_HEADERS,g' configure.* 
-libtoolize --copy --force
-autoreconf -f -v --install
-%setup_compile_flags
-export PYTHON=%{__python2}
 #gcc-ed this too. Sflo
 export CC=gcc
 export CXX=g++
+export PYTHON=%__python2
 
 %configure \
 	--sbindir=/sbin \
@@ -181,6 +187,7 @@ mv %{buildroot}/%{_lib}/pkgconfig %{buildroot}%{_libdir}
 rm -f %{buildroot}/%{_lib}/*.so
 rm -f %{buildroot}/%{_lib}/*.la
 rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
+rm -f %{buildroot}%{py2_platsitedir}/*.{a,la}
 
 %post
 # Copy default rules into place on new installation
@@ -245,6 +252,7 @@ fi
 %{_libdir}/libaudit.so
 %{_includedir}/libaudit.h
 %{_libdir}/pkgconfig/audit.pc
+%{_libdir}/pkgconfig/auparse.pc
 %{_mandir}/man3/audit_*
 %{_mandir}/man3/ausearch_*
 %{_mandir}/man3/get_auditfail_action.3*
@@ -265,6 +273,10 @@ fi
 
 %files -n %{auparsestaticdevname}
 %{_libdir}/libauparse.a
+
+%files -n python-audit
+%{py3_platsitedir}/*.so
+%{py3_platsitedir}/audit.p*
 
 %files -n python2-audit
 %{py2_platsitedir}/*.so
