@@ -147,6 +147,9 @@ export PYTHON=%{__python2}
 %ifarch aarch64
 	--with-aarch64 \
 %endif
+%ifarch armv7hl
+	--with-arm \
+%endif
 	--with-libcap-ng=yes \
 	--libexecdir=%{_sbindir}
 
@@ -193,13 +196,11 @@ fi
 %doc README contrib/capp.rules contrib/nispom.rules contrib/lspp.rules contrib/stig.rules init.d/auditd.cron
 %{_unitdir}/auditd.service
 %attr(0750,root,root) %dir %{_sysconfdir}/audit
-%attr(0750,root,root) %dir %{_sysconfdir}/audit/rules.d
 %attr(0750,root,root) %dir %{_sysconfdir}/audisp
 %attr(0750,root,root) %dir %{_sysconfdir}/audisp/plugins.d
 %attr(0750,root,root) %dir %{_libdir}/audit
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/auditd.conf
-%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/rules.d/audit.rules
-%optional %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/audit.rules
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/audit-stop.rules
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audispd.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/af_unix.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/syslog.conf
@@ -241,6 +242,7 @@ fi
 %doc contrib/skeleton.c contrib/plugin
 %{_libdir}/libaudit.so
 %{_includedir}/libaudit.h
+%{_datadir}/aclocal/audit.m4
 %{_libdir}/pkgconfig/audit.pc
 %{_libdir}/pkgconfig/auparse.pc
 %{_mandir}/man3/audit_*
