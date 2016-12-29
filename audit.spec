@@ -13,8 +13,8 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	2.4.4
-Release:	3
+Version:	2.7.0
+Release:	1
 License:	LGPLv2+
 Group:		System/Base
 Url:		http://people.redhat.com/sgrubb/audit/
@@ -32,8 +32,7 @@ BuildRequires:	pkgconfig(libcap-ng)
 BuildRequires:	pkgconfig(libprelude)
 BuildRequires:	pkgconfig(python2)
 BuildRequires:	pkgconfig(python3)
-BuildRequires:	systemd-units
-BuildRequires:	gcc-c++, gcc, gcc-cpp
+BuildRequires:	pkgconfig(libsystemd)
 
 Requires(preun,post):	rpm-helper
 # has the mandriva-simple-auth pam config file we link to
@@ -135,12 +134,7 @@ find -type d -name ".libs" | xargs rm -rf
 
 
 %build
-#fix build with new automake
-sed -i -e 's,AM_CONFIG_HEADER,AC_CONFIG_HEADERS,g' configure.* 
-#gcc-ed this too. Sflo
-export CC=gcc
-export CXX=g++
-export PYTHON=%__python2
+export PYTHON=%{__python2}
 
 %configure \
 	--sbindir=/sbin \
@@ -192,15 +186,11 @@ rm -f %{buildroot}%{py2_platsitedir}/*.{a,la}
 %post
 # Copy default rules into place on new installation
 if [ ! -e /etc/audit/audit.rules ] ; then
-	cp /etc/audit/rules.d/audit.rules /etc/audit/audit.rules
+    cp /etc/audit/rules.d/audit.rules /etc/audit/audit.rules
 fi
-%_post_service auditd
-
-%preun
-%_preun_service auditd
 
 %files
-%doc README COPYING contrib/capp.rules contrib/nispom.rules contrib/lspp.rules contrib/stig.rules init.d/auditd.cron
+%doc README contrib/capp.rules contrib/nispom.rules contrib/lspp.rules contrib/stig.rules init.d/auditd.cron
 %{_unitdir}/auditd.service
 %attr(0750,root,root) %dir %{_sysconfdir}/audit
 %attr(0750,root,root) %dir %{_sysconfdir}/audit/rules.d
@@ -248,7 +238,7 @@ fi
 %attr(0644,root,root) %{_mandir}/man5/libaudit.conf.5*
 
 %files -n %{devname}
-%doc ChangeLog contrib/skeleton.c contrib/plugin
+%doc contrib/skeleton.c contrib/plugin
 %{_libdir}/libaudit.so
 %{_includedir}/libaudit.h
 %{_libdir}/pkgconfig/audit.pc
