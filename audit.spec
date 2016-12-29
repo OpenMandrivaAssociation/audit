@@ -211,6 +211,7 @@ fi
 %attr(0750,root,root) %dir %{_sysconfdir}/audisp
 %attr(0750,root,root) %dir %{_sysconfdir}/audisp/plugins.d
 %attr(0750,root,root) %dir %{_libdir}/audit
+%attr(0750,root,root) %dir %{_sysconfdir}/audit/rules.d
 %ghost %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/rules.d/audit.rules
 %ghost %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/audit.rules
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/auditd.conf
