@@ -19,8 +19,8 @@ License:	LGPLv2+
 Group:		System/Base
 Url:		http://people.redhat.com/sgrubb/audit/
 Source0:	http://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
+Source1:	%{name}-tmpfiles.conf
 Source100:	%{name}.rpmlintrc
-
 BuildRequires:	intltool
 BuildRequires:	libtool
 BuildRequires:	swig
@@ -159,6 +159,7 @@ export PYTHON=%{__python2}
 install -d %{buildroot}%{_var}/log/audit
 install -d %{buildroot}%{_libdir}/audit
 install -d %{buildroot}%{_var}/spool/audit
+install -D -p -m 644 %{SOURCE1} %{buildroot}%{_tmpfilesdir}/%{name}.conf
 
 %makeinstall_std
 install -d %{buildroot}/%{_libdir}
@@ -174,11 +175,10 @@ ln -s ../../%{_lib}/$LIBNAME libauparse.so
 cd $curdir
 
 mkdir -p %{buildroot}%{_unitdir}
-mv %{buildroot}/%{_prefix}/lib/systemd/system/auditd.service %{buildroot}%{_unitdir}
+mv %{buildroot}/%{_prefix}/lib/systemd/system/auditd.service %{buildroot}%{_systemunitdir}
 
 # Move the pkgconfig file
 mv %{buildroot}/%{_lib}/pkgconfig %{buildroot}%{_libdir}
-
 
 # uneeded files
 rm -f %{buildroot}/%{_lib}/*.so
@@ -186,19 +186,33 @@ rm -f %{buildroot}/%{_lib}/*.la
 rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
 rm -f %{buildroot}%{py2_platsitedir}/*.{a,la}
 
+install -d %{buildroot}%{_presetdir}
+cat > %{buildroot}%{_presetdir}/86-audit.preset << EOF
+enable auditd.service
+EOF
+
 %post
 # Copy default rules into place on new installation
-if [ ! -e /etc/audit/audit.rules ] ; then
-    cp /etc/audit/rules.d/audit.rules /etc/audit/audit.rules
+files=`ls /etc/audit/rules.d/ 2>/dev/null | wc -w`
+if [ "$files" -eq 0 ] ; then
+# FESCO asked for audit to be off by default. #1117953
+    if [ -e /usr/share/doc/audit/rules/10-no-audit.rules ]; then
+	cp /usr/share/doc/audit/rules/10-no-audit.rules /etc/audit/rules.d/audit.rules
+    else
+	touch /etc/audit/rules.d/audit.rules
+    fi
+    chmod 0600 /etc/audit/rules.d/audit.rules
 fi
 
 %files
-%doc README contrib/capp.rules contrib/nispom.rules contrib/lspp.rules contrib/stig.rules init.d/auditd.cron
-%{_unitdir}/auditd.service
+%doc README rules init.d/auditd.cron
+%{_systemunitdir}/auditd.service
 %attr(0750,root,root) %dir %{_sysconfdir}/audit
 %attr(0750,root,root) %dir %{_sysconfdir}/audisp
 %attr(0750,root,root) %dir %{_sysconfdir}/audisp/plugins.d
 %attr(0750,root,root) %dir %{_libdir}/audit
+%ghost %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/rules.d/audit.rules
+%ghost %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/audit.rules
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/auditd.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/audit-stop.rules
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audispd.conf
@@ -232,6 +246,8 @@ fi
 %attr(0644,root,root) %{_mandir}/man8/auvirt.8*
 %attr(6444,root,root) %{_mandir}/man8/augenrules.8*
 %attr(0700,root,root) %dir %{_var}/log/audit
+%{_presetdir}/86-audit.preset
+%{_tmpfilesdir}/%{name}.conf
 
 %files -n %{libname}
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/libaudit.conf
@@ -257,7 +273,6 @@ fi
 /%{_lib}/libauparse.so.%{auparsemajor}*
 
 %files -n %{auparsedevname}
-%doc ChangeLog contrib/skeleton.c contrib/plugin
 %{_libdir}/libauparse.so
 %{_includedir}/auparse-defs.h
 %{_includedir}/auparse.h
