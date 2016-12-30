@@ -13,14 +13,14 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	2.4.4
-Release:	3
+Version:	2.7
+Release:	1
 License:	LGPLv2+
 Group:		System/Base
 Url:		http://people.redhat.com/sgrubb/audit/
 Source0:	http://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
+Source1:	%{name}-tmpfiles.conf
 Source100:	%{name}.rpmlintrc
-
 BuildRequires:	intltool
 BuildRequires:	libtool
 BuildRequires:	swig
@@ -32,8 +32,7 @@ BuildRequires:	pkgconfig(libcap-ng)
 BuildRequires:	pkgconfig(libprelude)
 BuildRequires:	pkgconfig(python2)
 BuildRequires:	pkgconfig(python3)
-BuildRequires:	systemd-units
-BuildRequires:	gcc-c++, gcc, gcc-cpp
+BuildRequires:	pkgconfig(libsystemd)
 
 Requires(preun,post):	rpm-helper
 # has the mandriva-simple-auth pam config file we link to
@@ -135,12 +134,7 @@ find -type d -name ".libs" | xargs rm -rf
 
 
 %build
-#fix build with new automake
-sed -i -e 's,AM_CONFIG_HEADER,AC_CONFIG_HEADERS,g' configure.* 
-#gcc-ed this too. Sflo
-export CC=gcc
-export CXX=g++
-export PYTHON=%__python2
+export PYTHON=%{__python2}
 
 %configure \
 	--sbindir=/sbin \
@@ -153,6 +147,9 @@ export PYTHON=%__python2
 %ifarch aarch64
 	--with-aarch64 \
 %endif
+%ifarch armv7hl
+	--with-arm \
+%endif
 	--with-libcap-ng=yes \
 	--libexecdir=%{_sbindir}
 
@@ -162,6 +159,7 @@ export PYTHON=%__python2
 install -d %{buildroot}%{_var}/log/audit
 install -d %{buildroot}%{_libdir}/audit
 install -d %{buildroot}%{_var}/spool/audit
+install -D -p -m 644 %{SOURCE1} %{buildroot}%{_tmpfilesdir}/%{name}.conf
 
 %makeinstall_std
 install -d %{buildroot}/%{_libdir}
@@ -177,11 +175,10 @@ ln -s ../../%{_lib}/$LIBNAME libauparse.so
 cd $curdir
 
 mkdir -p %{buildroot}%{_unitdir}
-mv %{buildroot}/%{_prefix}/lib/systemd/system/auditd.service %{buildroot}%{_unitdir}
+mv %{buildroot}/%{_prefix}/lib/systemd/system/auditd.service %{buildroot}%{_systemunitdir}
 
 # Move the pkgconfig file
 mv %{buildroot}/%{_lib}/pkgconfig %{buildroot}%{_libdir}
-
 
 # uneeded files
 rm -f %{buildroot}/%{_lib}/*.so
@@ -189,27 +186,36 @@ rm -f %{buildroot}/%{_lib}/*.la
 rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
 rm -f %{buildroot}%{py2_platsitedir}/*.{a,la}
 
+install -d %{buildroot}%{_presetdir}
+cat > %{buildroot}%{_presetdir}/86-audit.preset << EOF
+enable auditd.service
+EOF
+
 %post
 # Copy default rules into place on new installation
-if [ ! -e /etc/audit/audit.rules ] ; then
-	cp /etc/audit/rules.d/audit.rules /etc/audit/audit.rules
+files=`ls /etc/audit/rules.d/ 2>/dev/null | wc -w`
+if [ "$files" -eq 0 ] ; then
+# FESCO asked for audit to be off by default. #1117953
+    if [ -e /usr/share/doc/audit/rules/10-no-audit.rules ]; then
+	cp /usr/share/doc/audit/rules/10-no-audit.rules /etc/audit/rules.d/audit.rules
+    else
+	touch /etc/audit/rules.d/audit.rules
+    fi
+    chmod 0600 /etc/audit/rules.d/audit.rules
 fi
-%_post_service auditd
-
-%preun
-%_preun_service auditd
 
 %files
-%doc README COPYING contrib/capp.rules contrib/nispom.rules contrib/lspp.rules contrib/stig.rules init.d/auditd.cron
-%{_unitdir}/auditd.service
+%doc README rules init.d/auditd.cron
+%{_systemunitdir}/auditd.service
 %attr(0750,root,root) %dir %{_sysconfdir}/audit
-%attr(0750,root,root) %dir %{_sysconfdir}/audit/rules.d
 %attr(0750,root,root) %dir %{_sysconfdir}/audisp
 %attr(0750,root,root) %dir %{_sysconfdir}/audisp/plugins.d
 %attr(0750,root,root) %dir %{_libdir}/audit
+%attr(0750,root,root) %ghost %dir %{_sysconfdir}/audit/rules.d
+%ghost %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/rules.d/audit.rules
+%ghost %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/audit.rules
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/auditd.conf
-%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/rules.d/audit.rules
-%optional %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/audit.rules
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/audit-stop.rules
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audispd.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/af_unix.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/syslog.conf
@@ -241,6 +247,8 @@ fi
 %attr(0644,root,root) %{_mandir}/man8/auvirt.8*
 %attr(6444,root,root) %{_mandir}/man8/augenrules.8*
 %attr(0700,root,root) %dir %{_var}/log/audit
+%{_presetdir}/86-audit.preset
+%{_tmpfilesdir}/%{name}.conf
 
 %files -n %{libname}
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/libaudit.conf
@@ -248,9 +256,10 @@ fi
 %attr(0644,root,root) %{_mandir}/man5/libaudit.conf.5*
 
 %files -n %{devname}
-%doc ChangeLog contrib/skeleton.c contrib/plugin
+%doc contrib/skeleton.c contrib/plugin
 %{_libdir}/libaudit.so
 %{_includedir}/libaudit.h
+%{_datadir}/aclocal/audit.m4
 %{_libdir}/pkgconfig/audit.pc
 %{_libdir}/pkgconfig/auparse.pc
 %{_mandir}/man3/audit_*
@@ -265,7 +274,6 @@ fi
 /%{_lib}/libauparse.so.%{auparsemajor}*
 
 %files -n %{auparsedevname}
-%doc ChangeLog contrib/skeleton.c contrib/plugin
 %{_libdir}/libauparse.so
 %{_includedir}/auparse-defs.h
 %{_includedir}/auparse.h
