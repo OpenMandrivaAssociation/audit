@@ -14,7 +14,7 @@
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
 Version:	2.7
-Release:	1
+Release:	2
 License:	LGPLv2+
 Group:		System/Base
 Url:		http://people.redhat.com/sgrubb/audit/
@@ -188,7 +188,7 @@ rm -f %{buildroot}%{py2_platsitedir}/*.{a,la}
 
 install -d %{buildroot}%{_presetdir}
 cat > %{buildroot}%{_presetdir}/86-audit.preset << EOF
-enable auditd.service
+disable auditd.service
 EOF
 
 %post
