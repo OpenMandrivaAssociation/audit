@@ -13,7 +13,7 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	2.7
+Version:	2.7.1
 Release:	2
 License:	LGPLv2+
 Group:		System/Base
