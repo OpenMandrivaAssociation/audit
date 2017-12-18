@@ -283,6 +283,7 @@ fi
 %{_libdir}/libauparse.a
 
 %files -n python-audit
+%{py3_platsitedir}/__pycache__/*.pyc
 %{py3_platsitedir}/*.so
 %{py3_platsitedir}/audit.p*
 
