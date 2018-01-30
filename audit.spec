@@ -14,7 +14,7 @@
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
 Version:	2.8.2
-Release:	1
+Release:	2
 License:	LGPLv2+
 Group:		System/Base
 Url:		http://people.redhat.com/sgrubb/audit/
@@ -29,7 +29,6 @@ BuildRequires:	glibc-devel >= 2.6
 BuildRequires:	openldap-devel
 BuildRequires:	tcp_wrappers-devel
 BuildRequires:	pkgconfig(libcap-ng)
-BuildRequires:	pkgconfig(libprelude)
 BuildRequires:	pkgconfig(python2)
 BuildRequires:	pkgconfig(python3)
 BuildRequires:	pkgconfig(libsystemd)
@@ -140,7 +139,7 @@ export PYTHON=%{__python2}
 	--sbindir=/sbin \
 	--libdir=/%{_lib} \
 	--enable-systemd \
-	--with-prelude \
+	--without-prelude \
 	--enable-static \
 	--with-libwrap \
 	--enable-gssapi-krb5=no \
@@ -292,19 +291,14 @@ fi
 %{py2_platsitedir}/audit.p*
 
 %files -n audispd-plugins
-%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audisp-prelude.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audisp-remote.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/audispd-zos-remote.conf
-%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/au-prelude.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/au-remote.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/zos-remote.conf
 %attr(0750,root,root) /sbin/audispd-zos-remote
-%attr(0750,root,root) /sbin/audisp-prelude
 %attr(0750,root,root) /sbin/audisp-remote
-%attr(0644,root,root) %{_mandir}/man5/audisp-prelude.conf.5*
 %attr(0644,root,root) %{_mandir}/man5/audisp-remote.conf.5*
 %attr(0644,root,root) %{_mandir}/man5/zos-remote.conf.5*
 %attr(0644,root,root) %{_mandir}/man8/audispd-zos-remote.8*
-%attr(0644,root,root) %{_mandir}/man8/audisp-prelude.8*
 %attr(0644,root,root) %{_mandir}/man8/audisp-remote.8*
 %attr(0750,root,root) %dir %{_var}/spool/audit
