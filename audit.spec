@@ -135,6 +135,11 @@ find -type d -name ".libs" | xargs rm -rf
 %build
 export PYTHON=%{__python2}
 
+%ifarch %{armx}
+export CC=gcc
+export CXX=g++
+%endif
+
 %configure \
 	--sbindir=/sbin \
 	--libdir=/%{_lib} \
