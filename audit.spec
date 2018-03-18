@@ -188,6 +188,9 @@ cd $curdir
 %if %{with systemd}
 mkdir -p %{buildroot}%{_systemunitdir}
 mv %{buildroot}/%{_prefix}/lib/systemd/system/auditd.service %{buildroot}%{_systemunitdir}/auditd.service
+%else
+rm -rf %{buildroot}%{_sysconfdir}/rc.d/init.d/auditd
+rm -rf %{buildroot}%{_sysconfdir}/sysconfig/auditd
 %endif
 
 # Move the pkgconfig file
