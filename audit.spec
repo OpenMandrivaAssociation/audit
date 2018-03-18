@@ -11,6 +11,8 @@
 %define auparsedevname %mklibname -d auparse
 %define auparsestaticdevname %mklibname -d -s auparse
 
+%bcond_with systemd
+
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
 Version:	2.8.2
@@ -31,7 +33,9 @@ BuildRequires:	tcp_wrappers-devel
 BuildRequires:	pkgconfig(libcap-ng)
 BuildRequires:	pkgconfig(python2)
 BuildRequires:	pkgconfig(python3)
-
+%if %{with systemd}
+BuildRequires:	pkgconfig(systemd)
+%endif
 Requires(preun,post):	rpm-helper
 # has the mandriva-simple-auth pam config file we link to
 Requires:	usermode-consoleonly >= 1.92-4
@@ -142,7 +146,11 @@ export CXX=g++
 %configure \
 	--sbindir=/sbin \
 	--libdir=/%{_lib} \
+%if %{with systemd}
+	--enable-systemd \
+%else
 	--disable-systemd \
+%endif
 	--without-prelude \
 	--enable-static \
 	--with-libwrap \
@@ -177,8 +185,10 @@ LIBNAME=`basename \`ls %{buildroot}/%{_lib}/libauparse.so.%{auparsemajor}.*.*\``
 ln -s ../../%{_lib}/$LIBNAME libauparse.so
 cd $curdir
 
-mkdir -p %{buildroot}%{_unitdir}
-mv %{buildroot}/%{_prefix}/lib/systemd/system/auditd.service %{buildroot}%{_systemunitdir}
+%if %{with systemd}
+mkdir -p %{buildroot}%{_systemunitdir}
+mv %{buildroot}/%{_prefix}/lib/systemd/system/auditd.service %{buildroot}%{_systemunitdir}/auditd.service
+%endif
 
 # Move the pkgconfig file
 mv %{buildroot}/%{_lib}/pkgconfig %{buildroot}%{_libdir}
@@ -229,6 +239,9 @@ fi
 %attr(0755,root,root) /sbin/aureport
 %attr(0755,root,root) /sbin/ausearch
 %attr(0755,root,root) /sbin/augenrules
+%if %{with systemd}
+%{_systemunitdir}/auditd.service
+%endif
 %attr(0755,root,root) %{_sbindir}/initscripts/legacy-actions/auditd/*
 %attr(0755,root,root) %{_bindir}/aulastlog
 %attr(0755,root,root) %{_bindir}/aulast
