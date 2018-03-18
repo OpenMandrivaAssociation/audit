@@ -31,7 +31,6 @@ BuildRequires:	tcp_wrappers-devel
 BuildRequires:	pkgconfig(libcap-ng)
 BuildRequires:	pkgconfig(python2)
 BuildRequires:	pkgconfig(python3)
-BuildRequires:	pkgconfig(libsystemd)
 
 Requires(preun,post):	rpm-helper
 # has the mandriva-simple-auth pam config file we link to
@@ -103,12 +102,12 @@ development.
 Summary:	Python bindings for %{name}
 Group:		Development/Python
 
-%description -n	python2-audit
+%description -n python2-audit
 This package contains python2 bindings for %{name}.
 
-%package -n     python-audit
-Summary:        Python bindings for %{name}
-Group:          Development/Python
+%package -n python-audit
+Summary:	Python bindings for %{name}
+Group:		Development/Python
 
 %description -n python-audit
 This package contains python3 bindings for %{name}.
@@ -143,7 +142,7 @@ export CXX=g++
 %configure \
 	--sbindir=/sbin \
 	--libdir=/%{_lib} \
-	--enable-systemd \
+	--disable-systemd \
 	--without-prelude \
 	--enable-static \
 	--with-libwrap \
