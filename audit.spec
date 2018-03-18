@@ -201,6 +201,7 @@ rm -f %{buildroot}/%{_lib}/*.so
 rm -f %{buildroot}/%{_lib}/*.la
 rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
 rm -f %{buildroot}%{py2_platsitedir}/*.{a,la}
+rm -rf %{buildroot}/%{_libdir}/%{name}
 
 install -d %{buildroot}%{_presetdir}
 cat > %{buildroot}%{_presetdir}/86-audit.preset << EOF
@@ -225,7 +226,6 @@ fi
 %attr(0750,root,root) %dir %{_sysconfdir}/audit
 %attr(0750,root,root) %dir %{_sysconfdir}/audisp
 %attr(0750,root,root) %dir %{_sysconfdir}/audisp/plugins.d
-%attr(0750,root,root) %dir %{_libdir}/audit
 %attr(0750,root,root) %ghost %dir %{_sysconfdir}/audit/rules.d
 %ghost %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/rules.d/audit.rules
 %ghost %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/audit.rules
