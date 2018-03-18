@@ -219,7 +219,6 @@ fi
 
 %files
 %doc README rules init.d/auditd.cron
-%{_systemunitdir}/auditd.service
 %attr(0750,root,root) %dir %{_sysconfdir}/audit
 %attr(0750,root,root) %dir %{_sysconfdir}/audisp
 %attr(0750,root,root) %dir %{_sysconfdir}/audisp/plugins.d
@@ -241,8 +240,8 @@ fi
 %attr(0755,root,root) /sbin/augenrules
 %if %{with systemd}
 %{_systemunitdir}/auditd.service
-%endif
 %attr(0755,root,root) %{_sbindir}/initscripts/legacy-actions/auditd/*
+%endif
 %attr(0755,root,root) %{_bindir}/aulastlog
 %attr(0755,root,root) %{_bindir}/aulast
 %attr(0755,root,root) %{_bindir}/ausyscall
