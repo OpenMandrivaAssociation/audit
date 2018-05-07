@@ -33,6 +33,7 @@ BuildRequires:	tcp_wrappers-devel
 BuildRequires:	pkgconfig(libcap-ng)
 BuildRequires:	pkgconfig(python2)
 BuildRequires:	pkgconfig(python3)
+BuildRequires:	systemd
 %if %{with systemd}
 BuildRequires:	pkgconfig(systemd)
 %endif
