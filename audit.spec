@@ -15,8 +15,8 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	2.8.3
-Release:	2
+Version:	2.8.4
+Release:	1
 License:	LGPLv2+
 Group:		System/Base
 Url:		http://people.redhat.com/sgrubb/audit/
@@ -35,7 +35,8 @@ BuildRequires:	pkgconfig(python2)
 BuildRequires:	pkgconfig(python3)
 BuildRequires:	systemd
 %if %{with systemd}
-BuildRequires:	pkgconfig(systemd)
+BuildRequires:	pkgconfig(libsystemd)
+BuildRequires:	systemd-macros
 %endif
 Requires(preun,post):	rpm-helper
 # has the mandriva-simple-auth pam config file we link to
@@ -129,9 +130,7 @@ audit system, audispd. These plugins can do things like relay events to remote
 machines or analyze events for suspicious behavior.
 
 %prep
-
-%setup -q
-%apply_patches
+%autosetup -p1
 
 find -type d -name ".libs" | xargs rm -rf
 
@@ -165,7 +164,7 @@ export CXX=g++
 	--with-libcap-ng=yes \
 	--libexecdir=%{_sbindir}
 
-%make
+%make_build
 
 %install
 install -d %{buildroot}%{_var}/log/audit
@@ -173,7 +172,7 @@ install -d %{buildroot}%{_libdir}/audit
 install -d %{buildroot}%{_var}/spool/audit
 install -D -p -m 644 %{SOURCE1} %{buildroot}%{_tmpfilesdir}/%{name}.conf
 
-%makeinstall_std
+%make_install
 install -d %{buildroot}/%{_libdir}
 # This winds up in the wrong place when libtool is involved
 mv %{buildroot}/%{_lib}/libaudit.a %{buildroot}%{_libdir}/
