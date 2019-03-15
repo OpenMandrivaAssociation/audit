@@ -15,7 +15,7 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	2.8.4
+Version:	2.8.5
 Release:	1
 License:	LGPLv2+
 Group:		System/Base
