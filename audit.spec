@@ -22,6 +22,7 @@ Group:		System/Base
 Url:		http://people.redhat.com/sgrubb/audit/
 Source0:	http://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
 Source1:	%{name}-tmpfiles.conf
+Patch0:		au_common.patch
 Source100:	%{name}.rpmlintrc
 BuildRequires:	intltool
 BuildRequires:	libtool
