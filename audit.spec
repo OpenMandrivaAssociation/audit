@@ -15,14 +15,13 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	2.8.5
-Release:	2
+Version:	3.0.1
+Release:	1
 License:	LGPLv2+
 Group:		System/Base
 Url:		http://people.redhat.com/sgrubb/audit/
 Source0:	http://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
 Source1:	%{name}-tmpfiles.conf
-Patch0:		au_common.patch
 Source100:	%{name}.rpmlintrc
 BuildRequires:	intltool
 BuildRequires:	libtool
@@ -32,12 +31,11 @@ BuildRequires:	glibc-devel >= 2.6
 BuildRequires:	openldap-devel
 BuildRequires:	tcp_wrappers-devel
 BuildRequires:	pkgconfig(libcap-ng)
-BuildRequires:	pkgconfig(python2)
 BuildRequires:	pkgconfig(python3)
-BuildRequires:	systemd
 %if %{with systemd}
 BuildRequires:	pkgconfig(libsystemd)
-BuildRequires:	systemd-macros
+BuildRequires:	systemd-rpm-macros
+%systemd_requires
 %endif
 Requires(preun,post):	rpm-helper
 # has the mandriva-simple-auth pam config file we link to
@@ -49,68 +47,61 @@ Conflicts:	audispd-plugins < 1.7.11
 The audit package contains the user space utilities for storing and searching
 the audit records generate by the audit subsystem in the Linux 2.6 kernel.
 
-%package -n	%{libname}
+%package -n %{libname}
 Summary:	Main libraries for %{name}
 Group:		System/Libraries
 Conflicts:	audit < 2.0
 
-%description -n	%{libname}
+%description -n %{libname}
 This package contains the main libraries for %{name}.
 
-%package -n	%{devname}
+%package -n %{devname}
 Summary:	Development files for %{name}
 Group:		Development/C
 Requires:	%{libname} = %{version}
 Provides:	%{name}-devel = %{version}-%{release}
 
-%description -n	%{devname}
+%description -n %{devname}
 This package contains development files for %{name}.
 
-%package -n	%{staticdevname}
+%package -n %{staticdevname}
 Summary:	Static libraries for %{name}
 Group:		Development/C
 Requires:	%{devname} = %{version}
 Provides:	audit-static-devel = %{version}-%{release}
 
-%description -n	%{staticdevname}
+%description -n %{staticdevname}
 This package contains static libraries for %{name} used for
 development.
 
-%package -n	%{auparselibname}
+%package -n %{auparselibname}
 Summary:	Main libraries for %{name}
 Group:		System/Libraries
 Conflicts:	%{mklibname audit 0} <= 1.7.13
 
-%description -n	%{auparselibname}
+%description -n %{auparselibname}
 This package contains the main auparse libraries for %{name}.
 
-%package -n	%{auparsedevname}
+%package -n %{auparsedevname}
 Summary:	Development files for %{name}
 Group:		Development/C
 Requires:	%{auparselibname} = %{version}
 Provides:	auparse-devel = %{version}-%{release}
 Conflicts:	%{mklibname audit 0 -d} <= 1.7.13
 
-%description -n	%{auparsedevname}
+%description -n %{auparsedevname}
 This package contains development files for %{name}.
 
-%package -n	%{auparsestaticdevname}
+%package -n %{auparsestaticdevname}
 Summary:	Static libraries for %{name}
 Requires:	%{auparsedevname} = %{version}
 Group:		Development/C
 Provides:	auparse-static-devel = %{version}-%{release}
 Conflicts:	%{mklibname audit 0 -d -s} <= 1.7.13
 
-%description -n	%{auparsestaticdevname}
+%description -n %{auparsestaticdevname}
 This package contains static libraries for %{name} used for
 development.
-
-%package -n	python2-audit
-Summary:	Python bindings for %{name}
-Group:		Development/Python
-
-%description -n python2-audit
-This package contains python2 bindings for %{name}.
 
 %package -n python-audit
 Summary:	Python bindings for %{name}
@@ -119,13 +110,13 @@ Group:		Development/Python
 %description -n python-audit
 This package contains python3 bindings for %{name}.
 
-%package -n	audispd-plugins
+%package -n audispd-plugins
 Summary:	Plugins for the audit event dispatcher
 Group:		System/Base
 Requires:	%{name} = %{version}
 Requires:	openldap
 
-%description -n	audispd-plugins
+%description -n audispd-plugins
 The audispd-plugins package provides plugins for the real-time interface to the
 audit system, audispd. These plugins can do things like relay events to remote
 machines or analyze events for suspicious behavior.
@@ -133,33 +124,28 @@ machines or analyze events for suspicious behavior.
 %prep
 %autosetup -p1
 
+# Remove the ids code, its not ready
+sed -i 's/ ids / /' audisp/plugins/Makefile.in
 find -type d -name ".libs" | xargs rm -rf
 
-
 %build
-export PYTHON=%{__python2}
-
-%ifarch %{armx}
-export CC=gcc
-export CXX=g++
-%endif
-
 %configure \
 	--sbindir=/sbin \
 	--libdir=/%{_lib} \
+	--with-python=no \
+	--with-python3=yes \
 %if %{with systemd}
 	--enable-systemd \
 %else
 	--disable-systemd \
 %endif
-	--without-prelude \
 	--enable-static \
 	--with-libwrap \
 	--enable-gssapi-krb5=no \
 %ifarch aarch64
 	--with-aarch64 \
 %endif
-%ifarch armv7hl
+%ifarch armv7hl armv7hnl
 	--with-arm \
 %endif
 	--with-libcap-ng=yes \
@@ -171,24 +157,24 @@ export CXX=g++
 install -d %{buildroot}%{_var}/log/audit
 install -d %{buildroot}%{_libdir}/audit
 install -d %{buildroot}%{_var}/spool/audit
-install -D -p -m 644 %{SOURCE1} %{buildroot}%{_tmpfilesdir}/%{name}.conf
 
 %make_install
 install -d %{buildroot}/%{_libdir}
 # This winds up in the wrong place when libtool is involved
 mv %{buildroot}/%{_lib}/libaudit.a %{buildroot}%{_libdir}/
 mv %{buildroot}/%{_lib}/libauparse.a %{buildroot}%{_libdir}/
-curdir=`pwd`
+curdir=$(pwd)
 cd %{buildroot}/%{_libdir}
-LIBNAME=`basename \`ls %{buildroot}/%{_lib}/libaudit.so.%{major}.*.*\``
+LIBNAME="$(basename $(ls %{buildroot}/%{_lib}/libaudit.so.%{major}.*.*))"
 ln -s ../../%{_lib}/$LIBNAME libaudit.so
-LIBNAME=`basename \`ls %{buildroot}/%{_lib}/libauparse.so.%{auparsemajor}.*.*\``
+LIBNAME="$(basename $(ls %{buildroot}/%{_lib}/libauparse.so.%{auparsemajor}.*.*))"
 ln -s ../../%{_lib}/$LIBNAME libauparse.so
 cd $curdir
 
 %if %{with systemd}
 mkdir -p %{buildroot}%{_systemunitdir}
 mv %{buildroot}/%{_prefix}/lib/systemd/system/auditd.service %{buildroot}%{_systemunitdir}/auditd.service
+install -D -p -m 644 %{SOURCE1} %{buildroot}%{_tmpfilesdir}/%{name}.conf
 %else
 rm -rf %{buildroot}%{_sysconfdir}/rc.d/init.d/auditd
 rm -rf %{buildroot}%{_sysconfdir}/sysconfig/auditd
@@ -201,7 +187,6 @@ mv %{buildroot}/%{_lib}/pkgconfig %{buildroot}%{_libdir}
 rm -f %{buildroot}/%{_lib}/*.so
 rm -f %{buildroot}/%{_lib}/*.la
 rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
-rm -f %{buildroot}%{py2_platsitedir}/*.{a,la}
 rm -rf %{buildroot}/%{_libdir}/%{name}
 
 install -d %{buildroot}%{_presetdir}
@@ -211,7 +196,7 @@ EOF
 
 %post
 # Copy default rules into place on new installation
-files=`ls /etc/audit/rules.d/ 2>/dev/null | wc -w`
+files=$(ls /etc/audit/rules.d/ 2>/dev/null | wc -w)
 if [ "$files" -eq 0 ] ; then
 # FESCO asked for audit to be off by default. #1117953
     if [ -e /usr/share/doc/audit/rules/10-no-audit.rules ]; then
@@ -222,20 +207,25 @@ if [ "$files" -eq 0 ] ; then
     chmod 0600 /etc/audit/rules.d/audit.rules
 fi
 
+%if %{with systemd}
+%systemd_post auditd.service
+
+%preun
+%systemd_preun auditd.service
+%endif
+
 %files
 %doc README rules init.d/auditd.cron
-%attr(0750,root,root) %dir %{_sysconfdir}/audit
-%attr(0750,root,root) %dir %{_sysconfdir}/audisp
-%attr(0750,root,root) %dir %{_sysconfdir}/audisp/plugins.d
-%attr(0750,root,root) %ghost %dir %{_sysconfdir}/audit/rules.d
-%ghost %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/rules.d/audit.rules
-%ghost %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/audit.rules
-%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/auditd.conf
-%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audit/audit-stop.rules
-%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audispd.conf
-%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/af_unix.conf
-%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/syslog.conf
-%attr(0750,root,root) /sbin/audispd
+%attr(0750,root,root) %dir %{_sysconfdir}/%{name}
+%attr(0750,root,root) %dir %{_datadir}/%{name}
+%attr(0750,root,root) %dir %{_datadir}/%{name}/sample-rules
+%attr(0750,root,root) %ghost %dir  %{_sysconfdir}/%{name}/rules.d
+%attr(0750,root,root) %dir  %{_sysconfdir}/%{name}/plugins.d
+%ghost %config(noreplace) %attr(0640,root,root)  %{_sysconfdir}/%{name}/rules.d/audit.rules
+%ghost %config(noreplace) %attr(0640,root,root)  %{_sysconfdir}/%{name}/audit.rules
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/auditd.conf
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/audit-stop.rules
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/plugins.d/af_unix.conf
 %attr(0750,root,root) /sbin/auditctl
 %attr(0750,root,root) /sbin/auditd
 %attr(0750,root,root) /sbin/autrace
@@ -243,18 +233,20 @@ fi
 %attr(0755,root,root) /sbin/ausearch
 %attr(0755,root,root) /sbin/augenrules
 %if %{with systemd}
+%{_tmpfilesdir}/%{name}.conf
 %{_systemunitdir}/auditd.service
 %attr(0755,root,root) %{_sbindir}/initscripts/legacy-actions/auditd/*
 %endif
+%{_presetdir}/86-audit.preset
 %attr(0755,root,root) %{_bindir}/aulastlog
 %attr(0755,root,root) %{_bindir}/aulast
 %attr(0755,root,root) %{_bindir}/ausyscall
 %attr(0755,root,root) %{_bindir}/auvirt
-%attr(0644,root,root) %{_mandir}/man5/audispd.conf.5*
+%attr(0644,root,root) %{_datadir}/%{name}/sample-rules/*
 %attr(0644,root,root) %{_mandir}/man5/auditd.conf.5*
 %attr(0644,root,root) %{_mandir}/man5/ausearch-expression.5*
+%attr(0644,root,root) %{_mandir}/man5/auditd-plugins.5*
 %attr(0644,root,root) %{_mandir}/man7/audit.rules.7*
-%attr(0644,root,root) %{_mandir}/man8/audispd.8*
 %attr(0644,root,root) %{_mandir}/man8/auditctl.8*
 %attr(0644,root,root) %{_mandir}/man8/auditd.8*
 %attr(0644,root,root) %{_mandir}/man8/aulast.8*
@@ -266,8 +258,7 @@ fi
 %attr(0644,root,root) %{_mandir}/man8/auvirt.8*
 %attr(6444,root,root) %{_mandir}/man8/augenrules.8*
 %attr(0700,root,root) %dir %{_var}/log/audit
-%{_presetdir}/86-audit.preset
-%{_tmpfilesdir}/%{name}.conf
+
 
 %files -n %{libname}
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/libaudit.conf
@@ -275,7 +266,6 @@ fi
 %attr(0644,root,root) %{_mandir}/man5/libaudit.conf.5*
 
 %files -n %{devname}
-%doc contrib/skeleton.c contrib/plugin
 %{_libdir}/libaudit.so
 %{_includedir}/libaudit.h
 %{_datadir}/aclocal/audit.m4
@@ -306,19 +296,18 @@ fi
 %{py3_platsitedir}/*.so
 %{py3_platsitedir}/audit.p*
 
-%files -n python2-audit
-%{py2_platsitedir}/*.so
-%{py2_platsitedir}/audit.p*
-
 %files -n audispd-plugins
-%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/audisp-remote.conf
-%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/audispd-zos-remote.conf
-%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/plugins.d/au-remote.conf
-%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/audisp/zos-remote.conf
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/audisp-remote.conf
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/plugins.d/au-remote.conf
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/plugins.d/audispd-zos-remote.conf
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/plugins.d/syslog.conf
+%config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/zos-remote.conf
+%attr(0750,root,root) /sbin/audisp-syslog
 %attr(0750,root,root) /sbin/audispd-zos-remote
 %attr(0750,root,root) /sbin/audisp-remote
 %attr(0644,root,root) %{_mandir}/man5/audisp-remote.conf.5*
 %attr(0644,root,root) %{_mandir}/man5/zos-remote.conf.5*
+%attr(0644,root,root) %{_mandir}/man8/audisp-syslog.8*
 %attr(0644,root,root) %{_mandir}/man8/audispd-zos-remote.8*
 %attr(0644,root,root) %{_mandir}/man8/audisp-remote.8*
 %attr(0750,root,root) %dir %{_var}/spool/audit
