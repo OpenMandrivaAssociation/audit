@@ -1,5 +1,6 @@
 %define major 1
-%define libname %mklibname audit %{major}
+%define oldlibname %mklibname audit 1
+%define libname %mklibname audit
 %define devname %mklibname -d audit
 %define staticdevname %mklibname -d -s audit
 
@@ -7,7 +8,8 @@
 %define _disable_lto 1
 
 %define auparsemajor 0
-%define auparselibname %mklibname auparse %{auparsemajor}
+%define oldauparselibname %mklibname auparse 0
+%define auparselibname %mklibname auparse
 %define auparsedevname %mklibname -d auparse
 %define auparsestaticdevname %mklibname -d -s auparse
 
@@ -15,8 +17,8 @@
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	3.0.7
-Release:	3
+Version:	3.1.2
+Release:	1
 License:	LGPLv2+
 Group:		System/Base
 Url:		http://people.redhat.com/sgrubb/audit/
@@ -30,6 +32,8 @@ BuildRequires:	gettext-devel
 BuildRequires:	glibc-devel >= 2.6
 BuildRequires:	openldap-devel
 BuildRequires:	tcp_wrappers-devel
+# Regular libtool breaks crosscompiling
+BuildRequires:	slibtool
 BuildRequires:	pkgconfig(libcap-ng)
 BuildRequires:	pkgconfig(python3)
 %if %{with systemd}
@@ -51,6 +55,7 @@ the audit records generate by the audit subsystem in the Linux 2.6 kernel.
 Summary:	Main libraries for %{name}
 Group:		System/Libraries
 Conflicts:	audit < 2.0
+%rename %{oldlibname}
 
 %description -n %{libname}
 This package contains the main libraries for %{name}.
@@ -78,6 +83,7 @@ development.
 Summary:	Main libraries for %{name}
 Group:		System/Libraries
 Conflicts:	%{mklibname audit 0} <= 1.7.13
+%rename %{oldauparselibname}
 
 %description -n %{auparselibname}
 This package contains the main auparse libraries for %{name}.
@@ -109,6 +115,13 @@ Group:		Development/Python
 
 %description -n python-audit
 This package contains python3 bindings for %{name}.
+
+%package -n go-audit
+Summary:	Go bindings for %{name}
+Group:		Development/Go
+
+%description -n go-audit
+This package contains Go bindings for %{name}.
 
 %package -n audispd-plugins
 Summary:	Plugins for the audit event dispatcher
@@ -151,14 +164,14 @@ find -type d -name ".libs" | xargs rm -rf
 	--with-libcap-ng=yes \
 	--libexecdir=%{_sbindir}
 
-%make_build
+%make_build LIBTOOL=slibtool
 
 %install
 install -d %{buildroot}%{_var}/log/audit
 install -d %{buildroot}%{_libdir}/audit
 install -d %{buildroot}%{_var}/spool/audit
 
-%make_install
+%make_install LIBTOOL=slibtool
 install -d %{buildroot}/%{_libdir}
 # This winds up in the wrong place when libtool is involved
 mv %{buildroot}/%{_lib}/libaudit.a %{buildroot}%{_libdir}/
@@ -259,7 +272,6 @@ fi
 %attr(6444,root,root) %{_mandir}/man8/augenrules.8*
 %attr(0700,root,root) %dir %{_var}/log/audit
 
-
 %files -n %{libname}
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/libaudit.conf
 /%{_lib}/libaudit.so.%{major}*
@@ -296,12 +308,16 @@ fi
 %{py3_platsitedir}/*.so
 %{py3_platsitedir}/audit.p*
 
+%files -n go-audit
+%{_prefix}/lib/golang/src/pkg/redhat.com/audit
+
 %files -n audispd-plugins
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/audisp-remote.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/plugins.d/au-remote.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/plugins.d/audispd-zos-remote.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/plugins.d/syslog.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/zos-remote.conf
+%attr(0750,root,root) /sbin/audisp-af_unix
 %attr(0750,root,root) /sbin/audisp-syslog
 %attr(0750,root,root) /sbin/audispd-zos-remote
 %attr(0750,root,root) /sbin/audisp-remote
@@ -310,4 +326,5 @@ fi
 %attr(0644,root,root) %{_mandir}/man8/audisp-syslog.8*
 %attr(0644,root,root) %{_mandir}/man8/audispd-zos-remote.8*
 %attr(0644,root,root) %{_mandir}/man8/audisp-remote.8*
+%attr(0644,root,root) %{_mandir}/man8/audisp-af_unix.8*
 %attr(0750,root,root) %dir %{_var}/spool/audit
