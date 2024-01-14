@@ -14,6 +14,7 @@
 %define auparsestaticdevname %mklibname -d -s auparse
 
 %bcond_with systemd
+%bcond_without golang
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
@@ -30,6 +31,9 @@ BuildRequires:	libtool
 BuildRequires:	swig
 BuildRequires:	gettext-devel
 BuildRequires:	glibc-devel >= 2.6
+%if %{with golang}
+BuildRequires:	golang
+%endif
 BuildRequires:	pkgconfig(ldap)
 BuildRequires:	wrap-devel
 # Regular libtool breaks crosscompiling
@@ -286,8 +290,10 @@ fi
 %{py3_platsitedir}/*.so
 %{py3_platsitedir}/audit.p*
 
+%if %{with golang}
 %files -n go-audit
 %{_prefix}/lib/golang/src/pkg/redhat.com/audit
+%endif
 
 %files -n audispd-plugins
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/audisp-remote.conf
