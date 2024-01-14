@@ -30,8 +30,8 @@ BuildRequires:	libtool
 BuildRequires:	swig
 BuildRequires:	gettext-devel
 BuildRequires:	glibc-devel >= 2.6
-BuildRequires:	openldap-devel
-BuildRequires:	tcp_wrappers-devel
+BuildRequires:	pkgconfig(ldap)
+BuildRequires:	wrap-devel
 # Regular libtool breaks crosscompiling
 BuildRequires:	slibtool
 BuildRequires:	pkgconfig(libcap-ng)
@@ -143,8 +143,6 @@ find -type d -name ".libs" | xargs rm -rf
 
 %build
 %configure \
-	--sbindir=/sbin \
-	--libdir=/%{_lib} \
 	--with-python=no \
 	--with-python3=yes \
 %if %{with systemd}
@@ -155,10 +153,10 @@ find -type d -name ".libs" | xargs rm -rf
 	--enable-static \
 	--with-libwrap \
 	--enable-gssapi-krb5=no \
-%ifarch aarch64
+%ifarch %{aarch64}
 	--with-aarch64 \
 %endif
-%ifarch armv7hl armv7hnl
+%ifarch %{arm}
 	--with-arm \
 %endif
 	--with-libcap-ng=yes \
@@ -172,17 +170,6 @@ install -d %{buildroot}%{_libdir}/audit
 install -d %{buildroot}%{_var}/spool/audit
 
 %make_install LIBTOOL=slibtool
-install -d %{buildroot}/%{_libdir}
-# This winds up in the wrong place when libtool is involved
-mv %{buildroot}/%{_lib}/libaudit.a %{buildroot}%{_libdir}/
-mv %{buildroot}/%{_lib}/libauparse.a %{buildroot}%{_libdir}/
-curdir=$(pwd)
-cd %{buildroot}/%{_libdir}
-LIBNAME="$(basename $(ls %{buildroot}/%{_lib}/libaudit.so.%{major}.*.*))"
-ln -s ../../%{_lib}/$LIBNAME libaudit.so
-LIBNAME="$(basename $(ls %{buildroot}/%{_lib}/libauparse.so.%{auparsemajor}.*.*))"
-ln -s ../../%{_lib}/$LIBNAME libauparse.so
-cd $curdir
 
 %if %{with systemd}
 mkdir -p %{buildroot}%{_systemunitdir}
@@ -192,15 +179,6 @@ install -D -p -m 644 %{SOURCE1} %{buildroot}%{_tmpfilesdir}/%{name}.conf
 rm -rf %{buildroot}%{_sysconfdir}/rc.d/init.d/auditd
 rm -rf %{buildroot}%{_sysconfdir}/sysconfig/auditd
 %endif
-
-# Move the pkgconfig file
-mv %{buildroot}/%{_lib}/pkgconfig %{buildroot}%{_libdir}
-
-# uneeded files
-rm -f %{buildroot}/%{_lib}/*.so
-rm -f %{buildroot}/%{_lib}/*.la
-rm -f %{buildroot}%{py_platsitedir}/*.{a,la}
-rm -rf %{buildroot}/%{_libdir}/%{name}
 
 install -d %{buildroot}%{_presetdir}
 cat > %{buildroot}%{_presetdir}/86-audit.preset << EOF
@@ -239,12 +217,12 @@ fi
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/auditd.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/audit-stop.rules
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/plugins.d/af_unix.conf
-%attr(0750,root,root) /sbin/auditctl
-%attr(0750,root,root) /sbin/auditd
-%attr(0750,root,root) /sbin/autrace
-%attr(0755,root,root) /sbin/aureport
-%attr(0755,root,root) /sbin/ausearch
-%attr(0755,root,root) /sbin/augenrules
+%attr(0750,root,root) %{_sbindir}/auditctl
+%attr(0750,root,root) %{_sbindir}/auditd
+%attr(0750,root,root) %{_sbindir}/autrace
+%attr(0755,root,root) %{_sbindir}/aureport
+%attr(0755,root,root) %{_sbindir}/ausearch
+%attr(0755,root,root) %{_sbindir}/augenrules
 %if %{with systemd}
 %{_tmpfilesdir}/%{name}.conf
 %{_systemunitdir}/auditd.service
@@ -274,7 +252,7 @@ fi
 
 %files -n %{libname}
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/libaudit.conf
-/%{_lib}/libaudit.so.%{major}*
+%{_libdir}/libaudit.so.%{major}*
 %attr(0644,root,root) %{_mandir}/man5/libaudit.conf.5*
 
 %files -n %{devname}
@@ -292,7 +270,7 @@ fi
 %{_libdir}/libaudit.a
 
 %files -n %{auparselibname}
-/%{_lib}/libauparse.so.%{auparsemajor}*
+%{_libdir}/libauparse.so.%{auparsemajor}*
 
 %files -n %{auparsedevname}
 %{_libdir}/libauparse.so
@@ -317,10 +295,10 @@ fi
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/plugins.d/audispd-zos-remote.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/plugins.d/syslog.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/zos-remote.conf
-%attr(0750,root,root) /sbin/audisp-af_unix
-%attr(0750,root,root) /sbin/audisp-syslog
-%attr(0750,root,root) /sbin/audispd-zos-remote
-%attr(0750,root,root) /sbin/audisp-remote
+%attr(0750,root,root) %{_sbindir}/audisp-af_unix
+%attr(0750,root,root) %{_sbindir}/audisp-syslog
+%attr(0750,root,root) %{_sbindir}/audispd-zos-remote
+%attr(0750,root,root) %{_sbindir}/audisp-remote
 %attr(0644,root,root) %{_mandir}/man5/audisp-remote.conf.5*
 %attr(0644,root,root) %{_mandir}/man5/zos-remote.conf.5*
 %attr(0644,root,root) %{_mandir}/man8/audisp-syslog.8*
