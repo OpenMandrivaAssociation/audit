@@ -19,7 +19,7 @@
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
 Version:	3.1.2
-Release:	1
+Release:	2
 License:	LGPLv2+
 Group:		System/Base
 Url:		http://people.redhat.com/sgrubb/audit/
@@ -46,8 +46,6 @@ BuildRequires:	systemd-rpm-macros
 %systemd_requires
 %endif
 Requires(preun,post):	rpm-helper
-# has the mandriva-simple-auth pam config file we link to
-Requires:	usermode-consoleonly >= 1.92-4
 Requires:	tcp_wrappers
 Conflicts:	audispd-plugins < 1.7.11
 
