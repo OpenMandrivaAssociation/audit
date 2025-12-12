@@ -19,7 +19,7 @@
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
 Version:	3.1.2
-Release:	2
+Release:	3
 License:	LGPLv2+
 Group:		System/Base
 Url:		https://people.redhat.com/sgrubb/audit/
