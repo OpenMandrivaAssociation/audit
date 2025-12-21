@@ -26,6 +26,10 @@ Url:		https://people.redhat.com/sgrubb/audit/
 Source0:	http://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
 Source1:	%{name}-tmpfiles.conf
 Source100:	%{name}.rpmlintrc
+BuildRequires:	autoconf
+BuildRequires:	automake
+BuildRequires:	libtool-base
+BuildRequires:	make
 BuildRequires:	intltool
 BuildRequires:	libtool
 BuildRequires:	swig
