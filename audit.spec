@@ -13,22 +13,22 @@
 %define auparsedevname %mklibname -d auparse
 %define auparsestaticdevname %mklibname -d -s auparse
 
-%bcond_with systemd
 %bcond_without golang
+%bcond_without python
+%bcond_without systemd
 
 Summary:	User-space tools for Linux 2.6 kernel auditing
 Name:		audit
-Version:	3.1.2
-Release:	3
+Version:	4.1.2
+Release:	1
 License:	LGPLv2+
 Group:		System/Base
 Url:		https://people.redhat.com/sgrubb/audit/
-Source0:	http://people.redhat.com/sgrubb/audit/%{name}-%{version}.tar.gz
-Source1:	%{name}-tmpfiles.conf
+Source0:	https://github.com/linux-audit/audit-userspace/archive/refs/tags/v%{version}.tar.gz
 Source100:	%{name}.rpmlintrc
 BuildRequires:	autoconf
 BuildRequires:	automake
-BuildRequires:	libtool-base
+BuildRequires:	slibtool
 BuildRequires:	make
 BuildRequires:	intltool
 BuildRequires:	libtool
@@ -39,18 +39,16 @@ BuildRequires:	glibc-devel >= 2.6
 BuildRequires:	golang
 %endif
 BuildRequires:	pkgconfig(ldap)
-BuildRequires:	wrap-devel
 # Regular libtool breaks crosscompiling
 BuildRequires:	slibtool
 BuildRequires:	pkgconfig(libcap-ng)
+%if %{with python}
 BuildRequires:	pkgconfig(python3)
+%endif
 %if %{with systemd}
 BuildRequires:	pkgconfig(libsystemd)
-BuildRequires:	systemd-rpm-macros
-%systemd_requires
 %endif
 Requires(preun,post):	rpm-helper
-Requires:	tcp_wrappers
 Conflicts:	audispd-plugins < 1.7.11
 
 %description
@@ -141,23 +139,22 @@ audit system, audispd. These plugins can do things like relay events to remote
 machines or analyze events for suspicious behavior.
 
 %prep
-%autosetup -p1
-
-# Remove the ids code, its not ready
-sed -i 's/ ids / /' audisp/plugins/Makefile.in
+%autosetup -p1 -n audit-userspace-%{version}
 find -type d -name ".libs" | xargs rm -rf
+autoreconf
 
 %build
 %configure \
 	--with-python=no \
+%if %{with python}
 	--with-python3=yes \
+%else
+	--with-python3=no \
+%endif
 %if %{with systemd}
 	--enable-systemd \
-%else
-	--disable-systemd \
 %endif
 	--enable-static \
-	--with-libwrap \
 	--enable-gssapi-krb5=no \
 %ifarch %{aarch64}
 	--with-aarch64 \
@@ -177,15 +174,6 @@ install -d %{buildroot}%{_var}/spool/audit
 
 %make_install LIBTOOL=slibtool
 
-%if %{with systemd}
-mkdir -p %{buildroot}%{_systemunitdir}
-mv %{buildroot}/%{_prefix}/lib/systemd/system/auditd.service %{buildroot}%{_systemunitdir}/auditd.service
-install -D -p -m 644 %{SOURCE1} %{buildroot}%{_tmpfilesdir}/%{name}.conf
-%else
-rm -rf %{buildroot}%{_sysconfdir}/rc.d/init.d/auditd
-rm -rf %{buildroot}%{_sysconfdir}/sysconfig/auditd
-%endif
-
 install -d %{buildroot}%{_presetdir}
 cat > %{buildroot}%{_presetdir}/86-audit.preset << EOF
 disable auditd.service
@@ -204,42 +192,30 @@ if [ "$files" -eq 0 ] ; then
     chmod 0600 /etc/audit/rules.d/audit.rules
 fi
 
-%if %{with systemd}
-%systemd_post auditd.service
-
-%preun
-%systemd_preun auditd.service
-%endif
-
 %files
-%doc README rules init.d/auditd.cron
+%doc rules init.d/auditd.cron
 %attr(0750,root,root) %dir %{_sysconfdir}/%{name}
-%attr(0750,root,root) %dir %{_datadir}/%{name}
-%attr(0750,root,root) %dir %{_datadir}/%{name}/sample-rules
 %attr(0750,root,root) %ghost %dir  %{_sysconfdir}/%{name}/rules.d
 %attr(0750,root,root) %dir  %{_sysconfdir}/%{name}/plugins.d
+%config(noreplace) %{_sysconfdir}/%{name}/plugins.d/filter.conf
 %ghost %config(noreplace) %attr(0640,root,root)  %{_sysconfdir}/%{name}/rules.d/audit.rules
 %ghost %config(noreplace) %attr(0640,root,root)  %{_sysconfdir}/%{name}/audit.rules
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/auditd.conf
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/audit-stop.rules
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/%{name}/plugins.d/af_unix.conf
+%config(noreplace) %{_sysconfdir}/%{name}/audisp-filter.conf
+%{_sysconfdir}/bash_completion.d/audit.bash_completion
 %attr(0750,root,root) %{_sbindir}/auditctl
 %attr(0750,root,root) %{_sbindir}/auditd
-%attr(0750,root,root) %{_sbindir}/autrace
+%{_bindir}/audisp-filter
 %attr(0755,root,root) %{_sbindir}/aureport
 %attr(0755,root,root) %{_sbindir}/ausearch
 %attr(0755,root,root) %{_sbindir}/augenrules
-%if %{with systemd}
-%{_tmpfilesdir}/%{name}.conf
-%{_systemunitdir}/auditd.service
 %attr(0755,root,root) %{_sbindir}/initscripts/legacy-actions/auditd/*
-%endif
 %{_presetdir}/86-audit.preset
 %attr(0755,root,root) %{_bindir}/aulastlog
 %attr(0755,root,root) %{_bindir}/aulast
 %attr(0755,root,root) %{_bindir}/ausyscall
-%attr(0755,root,root) %{_bindir}/auvirt
-%attr(0644,root,root) %{_datadir}/%{name}/sample-rules/*
 %attr(0644,root,root) %{_mandir}/man5/auditd.conf.5*
 %attr(0644,root,root) %{_mandir}/man5/ausearch-expression.5*
 %attr(0644,root,root) %{_mandir}/man5/auditd-plugins.5*
@@ -251,29 +227,37 @@ fi
 %attr(0644,root,root) %{_mandir}/man8/aureport.8*
 %attr(0644,root,root) %{_mandir}/man8/ausearch.8*
 %attr(0644,root,root) %{_mandir}/man8/ausyscall.8*
-%attr(0644,root,root) %{_mandir}/man8/autrace.8*
-%attr(0644,root,root) %{_mandir}/man8/auvirt.8*
 %attr(6444,root,root) %{_mandir}/man8/augenrules.8*
 %attr(0700,root,root) %dir %{_var}/log/audit
+%{_datadir}/audit-rules
+%{_unitdir}/audit-rules.service
+%{_unitdir}/auditd.service
+%{_tmpfilesdir}/audit.conf
+%{_mandir}/man5/auditd.cron.5*
+%{_mandir}/man8/audisp-filter.8*
 
 %files -n %{libname}
 %config(noreplace) %attr(0640,root,root) %{_sysconfdir}/libaudit.conf
 %{_libdir}/libaudit.so.%{major}*
+%{_libdir}/libauplugin.so.1*
 %attr(0644,root,root) %{_mandir}/man5/libaudit.conf.5*
 
 %files -n %{devname}
 %{_libdir}/libaudit.so
-%{_includedir}/libaudit.h
+%{_libdir}/libauplugin.so
+%{_includedir}/*.h
 %{_datadir}/aclocal/audit.m4
 %{_libdir}/pkgconfig/audit.pc
 %{_libdir}/pkgconfig/auparse.pc
 %{_mandir}/man3/audit_*
 %{_mandir}/man3/ausearch_*
 %{_mandir}/man3/get_auditfail_action.3*
-%{_mandir}/man3/set_aumessage_mode.3*
+%{_mandir}/man3/auplugin.3*
+%{_mandir}/man3/auplugin_fgets.3*
 
 %files -n %{staticdevname}
 %{_libdir}/libaudit.a
+%{_libdir}/libauplugin.a
 
 %files -n %{auparselibname}
 %{_libdir}/libauparse.so.%{auparsemajor}*
@@ -287,10 +271,12 @@ fi
 %files -n %{auparsestaticdevname}
 %{_libdir}/libauparse.a
 
+%if %{with python}
 %files -n python-audit
 %{py3_platsitedir}/__pycache__/*.py*
 %{py3_platsitedir}/*.so
 %{py3_platsitedir}/audit.p*
+%endif
 
 %if %{with golang}
 %files -n go-audit
